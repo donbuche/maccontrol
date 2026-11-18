@@ -152,7 +152,7 @@ export default {
       { q: 'macOS dice que no puede abrir la app. ¿Qué hago?', a: 'MacControl todavía no está notarizada por Apple. Ve a <strong>Ajustes del Sistema → Privacidad y seguridad</strong> y pulsa <strong>Abrir igualmente</strong> junto al mensaje sobre MacControl. Solo hay que hacerlo una vez.' },
       { q: '¿En qué Macs funciona?', a: 'En Macs con chip de Apple (M1 o posterior) con macOS 12 Monterey o posterior. Los gestos necesitan el trackpad del portátil o un Magic Trackpad.' },
       { q: '¿Qué pasa al cerrar la ventana?', a: 'MacControl sigue funcionando desde su icono de chistera en la barra de menús, y su icono del Dock desaparece. Para cerrarla del todo, elige <strong>Salir de MacControl</strong> en el menú de ese icono.' },
-      { q: '¿En qué idioma está la app?', a: 'En castellano. Los atajos y los gestos funcionan igual sea cual sea el idioma de tu Mac.' },
+      { q: '¿En qué idioma está la app?', a: 'En castellano, catalán e inglés: usa el idioma de tu Mac y puedes cambiarlo en Ajustes.' },
     ],
   },
 

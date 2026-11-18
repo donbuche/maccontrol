@@ -138,7 +138,7 @@ export default {
       'The first time, macOS will say it can’t check the app. Go to <strong>System Settings → Privacy &amp; Security</strong> and click <strong>Open Anyway</strong>.',
       'Allow MacControl in <strong>Privacy &amp; Security → Accessibility</strong> (and <strong>Input Monitoring</strong> if it asks). It needs this to read shortcuts and move windows.',
     ],
-    note: 'Requires macOS 12 or later on a Mac with Apple silicon. The app’s interface is in Spanish for now.',
+    note: 'Requires macOS 12 or later on a Mac with Apple silicon.',
     cta: 'Get the latest release',
   },
 
@@ -152,7 +152,7 @@ export default {
       { q: 'macOS says the app can’t be opened. What do I do?', a: 'MacControl isn’t notarised by Apple yet. Go to <strong>System Settings → Privacy &amp; Security</strong> and click <strong>Open Anyway</strong> next to the message about MacControl. You only need to do this once.' },
       { q: 'Which Macs does it run on?', a: 'Macs with Apple silicon (M1 or later) running macOS 12 Monterey or later. Gestures need a built-in trackpad or a Magic Trackpad.' },
       { q: 'What happens when I close the window?', a: 'MacControl keeps working from its top-hat icon in the menu bar, and its Dock icon goes away. To quit it completely, choose <strong>Salir de MacControl</strong> (Quit) from that icon’s menu.' },
-      { q: 'Is the app in English?', a: 'Not yet: the interface is in Spanish for now. Shortcuts and gestures work the same whatever language your Mac uses.' },
+      { q: 'Is the app in English?', a: 'Yes. The interface is in English, Spanish and Catalan: it follows your Mac’s language and you can change it in Settings.' },
     ],
   },
 
