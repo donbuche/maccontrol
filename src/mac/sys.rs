@@ -67,6 +67,19 @@ pub fn frontmost_app() -> (String, String) {
     })
 }
 
+/// Process id of the frontmost app.
+pub fn frontmost_pid() -> Option<i32> {
+    autoreleasepool(|_| unsafe {
+        let ws: *mut AnyObject = msg_send![class!(NSWorkspace), sharedWorkspace];
+        let app: *mut AnyObject = msg_send![ws, frontmostApplication];
+        if app.is_null() {
+            return None;
+        }
+        let pid: i32 = msg_send![app, processIdentifier];
+        (pid > 0).then_some(pid)
+    })
+}
+
 /// Apps with a Dock icon that are running now: (bundle id, name).
 pub fn running_apps() -> Vec<(String, String)> {
     autoreleasepool(|_| unsafe {

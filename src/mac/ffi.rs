@@ -121,6 +121,7 @@ unsafe extern "C" {
     pub fn CFArrayGetValueAtIndex(a: CFTypeRef, i: isize) -> *const c_void;
     pub fn CFGetTypeID(cf: CFTypeRef) -> usize;
     pub fn CFStringGetTypeID() -> usize;
+    pub fn CFBooleanGetTypeID() -> usize;
 }
 
 pub fn mask(t: u32) -> u64 {

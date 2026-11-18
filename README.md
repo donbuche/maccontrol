@@ -62,7 +62,7 @@ Requires macOS 12 or later on a Mac with Apple silicon.
 
 ### Privacy
 
-MacControl compares each key press, mouse button and gesture with your rules and lets everything else through. Nothing is stored apart from your rules, and nothing is sent anywhere. The settings live in `~/Library/Application Support/MacControl/config.json`.
+MacControl compares each key press, mouse button and gesture with your rules and lets everything else through. Nothing is sent anywhere. The settings live in `~/Library/Application Support/MacControl/config.json`, and a small diagnostic log in `~/Library/Logs/MacControl.log` notes only the shortcuts that matched a rule and what happened to the window they moved, never ordinary typing.
 
 ## Tech stack
 
