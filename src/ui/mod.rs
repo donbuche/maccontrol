@@ -145,8 +145,11 @@ pub struct MacApp {
 }
 
 impl MacApp {
-    pub fn new(cc: &eframe::CreationContext<'_>, screenshot: Option<PathBuf>, page: Option<String>) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>, screenshot: Option<PathBuf>, page: Option<String>, scale: f32) -> Self {
         theme::apply(&cc.egui_ctx);
+        if scale != 1.0 {
+            cc.egui_ctx.set_zoom_factor(scale);
+        }
         let eng = engine();
         let _ = eng.ctx.set(cc.egui_ctx.clone());
         let start = match page.as_deref() {
