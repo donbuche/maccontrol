@@ -70,6 +70,7 @@ fn handle(etype: u32, event: CGEventRef) -> bool {
             let kind = TriggerKind::Keyboard(combo);
             if let Some(a) = eng.lookup(&kind) {
                 if !repeat {
+                    super::log::write(format!("key {} in {} -> {}", combo.label(), eng.app_id(), a.label()));
                     eng.note(combo.label(), Some(&a));
                     eng.run_action(a);
                 }

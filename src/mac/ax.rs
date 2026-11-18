@@ -115,32 +115,60 @@ impl Elem {
         Some(R::new(p.x as f32, p.y as f32, s.width as f32, s.height as f32))
     }
 
-    fn set_point(&self, x: f32, y: f32) {
+    /// Returns the Accessibility error code (0 = done).
+    fn set_point(&self, x: f32, y: f32) -> i32 {
         let p = CGPoint { x: x as f64, y: y as f64 };
         let key = CFString::new("AXPosition");
         unsafe {
             let v = AXValueCreate(kAXValueCGPointType, &p as *const _ as *const c_void);
-            AXUIElementSetAttributeValue(self.0, key.as_concrete_TypeRef() as CFStringRef, v);
+            let err = AXUIElementSetAttributeValue(self.0, key.as_concrete_TypeRef() as CFStringRef, v);
             CFRelease(v);
+            err
         }
     }
 
-    fn set_size(&self, w: f32, h: f32) {
+    /// Returns the Accessibility error code (0 = done).
+    fn set_size(&self, w: f32, h: f32) -> i32 {
         let s = CGSize { width: w as f64, height: h as f64 };
         let key = CFString::new("AXSize");
         unsafe {
             let v = AXValueCreate(kAXValueCGSizeType, &s as *const _ as *const c_void);
-            AXUIElementSetAttributeValue(self.0, key.as_concrete_TypeRef() as CFStringRef, v);
+            let err = AXUIElementSetAttributeValue(self.0, key.as_concrete_TypeRef() as CFStringRef, v);
             CFRelease(v);
+            err
         }
+    }
+
+    /// The application this element belongs to.
+    pub fn app(&self) -> Elem {
+        Elem(unsafe { AXUIElementCreateApplication(self.pid()) })
     }
 
     /// Move then resize then move again: apps that refuse a size near a screen edge
     /// accept it once the window has moved.
+    ///
+    /// Chromium and Electron apps (Chrome, VS Code, Slack…) switch on
+    /// `AXEnhancedUserInterface` when they see an accessibility client, and while it is on
+    /// they animate or undo outside changes to their windows. It is switched off for the move
+    /// and back on afterwards.
     pub fn set_frame(&self, r: R) {
-        self.set_point(r.x, r.y);
-        self.set_size(r.w, r.h);
-        self.set_point(r.x, r.y);
+        let app = self.app();
+        short_timeout(&app);
+        let enhanced = app.get_bool("AXEnhancedUserInterface");
+        if enhanced {
+            app.set_bool("AXEnhancedUserInterface", false);
+        }
+        let before = self.frame();
+        let e1 = self.set_point(r.x, r.y);
+        let e2 = self.set_size(r.w, r.h);
+        let e3 = self.set_point(r.x, r.y);
+        if enhanced {
+            app.set_bool("AXEnhancedUserInterface", true);
+        }
+        super::log::write(format!(
+            "move window: pid {} enhancedUI {} from {:?} to {:?} -> errors {}/{}/{} now {:?}",
+            self.pid(), enhanced, before.map(fmt_r), fmt_r(r), e1, e2, e3, self.frame().map(fmt_r)
+        ));
     }
 
     #[allow(dead_code)]
@@ -159,6 +187,10 @@ impl Elem {
     fn get_bool(&self, name: &str) -> bool {
         match attr(self.0, name) {
             Some(v) => unsafe {
+                if CFGetTypeID(v) != CFBooleanGetTypeID() {
+                    CFRelease(v);
+                    return false;
+                }
                 let b = CFBoolean::wrap_under_create_rule(v as _);
                 b.into()
             },
@@ -188,6 +220,10 @@ impl Elem {
     }
 }
 
+fn fmt_r(r: R) -> String {
+    format!("({:.0},{:.0} {:.0}x{:.0})", r.x, r.y, r.w, r.h)
+}
+
 fn own_pid() -> i32 {
     std::process::id() as i32
 }
@@ -206,15 +242,56 @@ fn short_timeout(el: &Elem) {
 }
 
 /// The window that has keyboard focus (never one of MacControl's own).
+///
+/// The frontmost app comes from AppKit and is asked directly. Asking the system-wide element
+/// for its "focused application" instead fails with Chromium and Electron apps (VS Code,
+/// Slack…), which don't answer that question.
 pub fn focused_window() -> Option<Elem> {
-    let sys = Elem::system();
-    short_timeout(&sys);
-    let app = sys.child("AXFocusedApplication")?;
+    let app = match super::sys::frontmost_pid() {
+        Some(pid) => Elem(unsafe { AXUIElementCreateApplication(pid) }),
+        None => {
+            let sys = Elem::system();
+            short_timeout(&sys);
+            let Some(app) = sys.child("AXFocusedApplication") else {
+                super::log::write("focused window: no frontmost or focused application");
+                return None;
+            };
+            app
+        }
+    };
     if is_self(&app) {
         return None;
     }
     short_timeout(&app);
-    app.child("AXFocusedWindow").or_else(|| app.child("AXMainWindow"))
+    let win = app
+        .child("AXFocusedWindow")
+        .or_else(|| app.child("AXMainWindow"))
+        .or_else(|| first_window(&app));
+    if win.is_none() {
+        super::log::write(format!("focused window: pid {} has no focused, main or listed window", app.pid()));
+    }
+    win
+}
+
+/// The first standard window in the app's window list (front to back).
+fn first_window(app: &Elem) -> Option<Elem> {
+    let wins = attr(app.0, "AXWindows")?;
+    let n = unsafe { CFArrayGetCount(wins) };
+    let mut found = None;
+    for i in 0..n {
+        let w = unsafe { CFArrayGetValueAtIndex(wins, i) };
+        if w.is_null() {
+            continue;
+        }
+        unsafe { CFRetain(w) };
+        let el = Elem(w);
+        if el.subrole() == "AXStandardWindow" {
+            found = Some(el);
+            break;
+        }
+    }
+    unsafe { CFRelease(wins) };
+    found
 }
 
 /// The window under a screen point, found from the window server's list (front to back)
