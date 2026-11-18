@@ -2,6 +2,7 @@ pub mod actions;
 pub mod ax;
 pub mod dock;
 pub mod ffi;
+pub mod log;
 pub mod mt;
 pub mod snapper;
 pub mod sys;
