@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1024" height="1024">
+<!-- MacControl's logo inside its own window: the Dock icon's hat on a faint glass tile, just
+     enough to lift it off the window's background. The tile follows macOS's icon grid: an 824 px rounded
+     square centred in the 1024 px canvas. Rendered to assets/logo.png by scripts/render-icons.sh. -->
+<defs>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1"/></filter>
+    <filter id="softer" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.4"/></filter>
+    <radialGradient id="brimTop" cx=".32" cy=".78" r=".85">
+      <stop offset="0" stop-color="#4a4e5b"/><stop offset=".35" stop-color="#25272f"/><stop offset=".75" stop-color="#121318"/><stop offset="1" stop-color="#0a0b0e"/>
+    </radialGradient>
+    <linearGradient id="brimSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2a2c34"/><stop offset=".35" stop-color="#3a3d48"/><stop offset="1" stop-color="#08090b"/>
+    </linearGradient>
+    <linearGradient id="crownSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0c0d10"/><stop offset=".14" stop-color="#2a2d35"/><stop offset=".32" stop-color="#565b69"/>
+      <stop offset=".46" stop-color="#2c2f37"/><stop offset=".78" stop-color="#121318"/><stop offset="1" stop-color="#060708"/>
+    </linearGradient>
+    <linearGradient id="crownShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset=".7" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".4"/>
+    </linearGradient>
+    <radialGradient id="topFace" cx=".38" cy=".55" r=".75">
+      <stop offset="0" stop-color="#555a68"/><stop offset=".55" stop-color="#2c2e36"/><stop offset="1" stop-color="#16171c"/>
+    </radialGradient>
+    <linearGradient id="bandWhite" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b9bec9"/><stop offset=".2" stop-color="#eef0f4"/><stop offset=".36" stop-color="#ffffff"/>
+      <stop offset=".62" stop-color="#dfe2e8"/><stop offset=".88" stop-color="#9ea4b1"/><stop offset="1" stop-color="#7d8390"/>
+    </linearGradient>
+    <linearGradient id="bandShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity=".18"/><stop offset=".25" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/>
+    </linearGradient>
+      <linearGradient id="tileBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity=".05"/>
+    </linearGradient>
+    <linearGradient id="tileGloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".2"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="tile"><rect x="9.77" y="9.77" width="80.47" height="80.47" rx="18.07"/></clipPath>
+  </defs>
+<rect x="9.77" y="9.77" width="80.47" height="80.47" rx="18.07" fill="url(#tileBg)"/>
+<g clip-path="url(#tile)">
+  <g transform="translate(50 52.5) scale(.72) translate(-50 -52)">
+    <ellipse cx="50" cy="80" rx="36" ry="5" fill="#000" opacity=".28" filter="url(#softer)"/>
+    <path d="M10.5 59 C12 53 20 49.5 30 48.5 C42 47 60 47 72 48.5 C82 50 88.5 54 88.5 59.5 C88.5 66 80 71 66 74.5 C55 77.5 45 78.5 38 78 C25 77 11.6 71.5 10.3 62.5 C10.1 61.2 10.2 60 10.5 59 Z" transform="translate(0 4.2)" fill="url(#brimSide)"/>
+    <path d="M10.5 59 C12 53 20 49.5 30 48.5 C42 47 60 47 72 48.5 C82 50 88.5 54 88.5 59.5 C88.5 66 80 71 66 74.5 C55 77.5 45 78.5 38 78 C25 77 11.6 71.5 10.3 62.5 C10.1 61.2 10.2 60 10.5 59 Z" transform="translate(0 2.1)" fill="url(#brimSide)"/>
+    <path d="M10.6 63 C12 71 24 79.6 38 80.8 C46 81.4 56 80.4 66 77.6" fill="none" stroke="#000" stroke-width="1.4" opacity=".45" transform="translate(0 .6)"/>
+    <path d="M10.5 59 C12 53 20 49.5 30 48.5 C42 47 60 47 72 48.5 C82 50 88.5 54 88.5 59.5 C88.5 66 80 71 66 74.5 C55 77.5 45 78.5 38 78 C25 77 11.6 71.5 10.3 62.5 C10.1 61.2 10.2 60 10.5 59 Z" fill="url(#brimTop)"/>
+    <path d="M11.5 62 C14 70 26 76.6 38 77.2 C46 77.6 56 76.4 66 73.4" fill="none" stroke="#a5abbd" stroke-width="1.6" opacity=".55" filter="url(#soft)"/>
+    <path d="M73 49.6 C82 51 87.6 54.6 87.8 59" fill="none" stroke="#8d93a6" stroke-width="1" opacity=".5" filter="url(#soft)"/>
+    <ellipse cx="49" cy="59.5" rx="28" ry="7.5" fill="#000" opacity=".55" filter="url(#softer)"/>
+    <path d="M22 25.5 L24.4 57.5 C32.4 63.5 64.4 63.5 74.4 55.5 L76.8 24.5 Z" fill="url(#crownSide)"/>
+    <path d="M22 25.5 L24.4 57.5 C32.4 63.5 64.4 63.5 74.4 55.5 L76.8 24.5 Z" fill="url(#crownShade)"/>
+    <path d="M22.6 27.5 L24.799999999999997 49.5" stroke="#7d8396" stroke-width="1" opacity=".55" filter="url(#soft)"/>
+    <path d="M23.799999999999997 49.5 C32.8 56 63.019354838709674 55.5 75.01935483870967 47.5 L74.4 55.5 C64.4 63.5 32.4 63.5 24.4 57.5 Z" fill="url(#bandWhite)"/>
+    <path d="M23.799999999999997 49.5 C32.8 56 63.019354838709674 55.5 75.01935483870967 47.5 L74.4 55.5 C64.4 63.5 32.4 63.5 24.4 57.5 Z" fill="url(#bandShade)"/>
+    <path d="M23.799999999999997 49.5 C32.8 56 63.019354838709674 55.5 75.01935483870967 47.5" fill="none" stroke="#000" stroke-width=".7" opacity=".35"/>
+    <path d="M24.4 57.5 C32.4 63.5 64.4 63.5 74.4 55.5" fill="none" stroke="#000" stroke-width="1" opacity=".45"/>
+    <g transform="rotate(-2 49.4 25)">
+      <ellipse cx="49.4" cy="25.6" rx="27.7" ry="6.8" fill="#1b1c22"/>
+      <ellipse cx="49.1" cy="24.8" rx="26.2" ry="5.8" fill="url(#topFace)"/>
+      <path d="M23 26.4 A26.799999999999997 6.6 0 0 0 75.8 26.4" fill="none" stroke="#a4aabd" stroke-width="1.5" opacity=".6" filter="url(#soft)"/>
+      <path d="M24 24 A25.4 5.5 0 0 1 72.8 22.4" fill="none" stroke="#6e7486" stroke-width=".7" opacity=".6"/>
+    </g>
+    <path d="M37 31 C37.4 38 38.4 44 39.6 48.5" fill="none" stroke="#d4d8e6" stroke-width="3.2" opacity=".24" filter="url(#softer)"/>
+  </g>
+  <rect x="9.77" y="9.77" width="80.47" height="80.47" fill="url(#tileGloss)"/>
+</g>
+<rect x="9.95" y="9.95" width="80.11" height="80.11" rx="17.9" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width=".36"/>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 12 84 84" width="36" height="36">
+<!-- Menu-bar template image: the hat in one colour (macOS tints it). Three transparent cuts
+     keep it readable at 18 pt: the ribbon, the front edge of the brim and the rim of the top.
+     Rendered to assets/tray.png by scripts/render-icons.sh. -->
+<defs><mask id="cuts" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+  <rect width="100" height="100" fill="#fff"/>
+  <path d="M23.8 49.5 C32.8 56 63.02 55.5 75.02 47.5 L74.4 55.5 C64.4 63.5 32.4 63.5 24.4 57.5 Z" fill="#000" stroke="#000" stroke-width="1.6"/>
+  <path d="M22 74.4 C27 76.6 32 77.6 38 78 C45 78.5 55 77.5 66 74.5 C69 73.7 71.6 72.7 74 71.6" fill="none" stroke="#000" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M23.6 27 A25.6 5.2 0 0 0 75.2 25.2" transform="rotate(-2 49.4 25)" fill="none" stroke="#000" stroke-width="2.4" stroke-linecap="round"/>
+</mask></defs>
+<g fill="#000" mask="url(#cuts)">
+  <path d="M10.5 59 C12 53 20 49.5 30 48.5 C42 47 60 47 72 48.5 C82 50 88.5 54 88.5 59.5 C88.5 66 80 71 66 74.5 C55 77.5 45 78.5 38 78 C25 77 11.6 71.5 10.3 62.5 C10.1 61.2 10.2 60 10.5 59 Z" transform="translate(0 6.5)"/>
+  <path d="M10.5 59 C12 53 20 49.5 30 48.5 C42 47 60 47 72 48.5 C82 50 88.5 54 88.5 59.5 C88.5 66 80 71 66 74.5 C55 77.5 45 78.5 38 78 C25 77 11.6 71.5 10.3 62.5 C10.1 61.2 10.2 60 10.5 59 Z"/>
+  <path d="M22 25.5 L24.4 57.5 C32.4 63.5 64.4 63.5 74.4 55.5 L76.8 24.5 Z"/>
+  <ellipse cx="49.4" cy="25.6" rx="27.7" ry="6.8" transform="rotate(-2 49.4 25)"/>
+</g>
+</svg>
