@@ -42,7 +42,7 @@ h1 em { font-style: normal; background: linear-gradient(100deg, #22d3ee, #7aa8ff
   <h1>${t.hero.title.replace(/&nbsp;/g, ' ')}</h1>
   <div class="tag">${t.hero.eyebrow.split(' · ')[0]}</div>
 </div>
-<div class="shot"><img src="${a('img/screens/home.webp')}" alt=""></div>
+<div class="shot"><img src="${a(`img/screens/${t.lang}/home.webp`)}" alt=""></div>
 </body></html>`;
 
 const outDir = join(site, 'assets', 'img', 'og');

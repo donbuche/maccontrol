@@ -36,7 +36,7 @@ Change `siteUrl` in `config.mjs` and add a `static/CNAME` file containing the do
 
 - Strings: `i18n/<lang>.mjs`. All files have the same keys.
 - Markup: `src/template.mjs`. Styles: `src/styles.css`. Behaviour: `src/main.js` (consent, menus, language suggestion, reveal on scroll, the window-snapping demo and the screenshot lightbox). Icons: `src/icons.mjs`.
-- Screenshots: WebP copies of `docs/screenshots/` at 1600 and 800 px wide in `assets/img/screens/`. To refresh them, run the app with `--screenshot <file.png> --page <name>` (see the main README), convert with `cwebp`, and run `og.mjs` again.
+- Screenshots: one set per language, at 1600 and 800 px wide, in `assets/img/screens/<lang>/` (the English set is also in `docs/screenshots/` for the main README). To refresh them, run the app with `MACCONTROL_LANG=<lang> maccontrol --screenshot <file.png> --page <name> --scale 1.8` (see the main README), convert with `cwebp -q 85 -resize 1600 0` (and `800 0`), and run `og.mjs` again.
 - Fonts: Bricolage Grotesque, Figtree and JetBrains Mono, self-hosted (SIL Open Font License).
 
 To add a language, copy `i18n/en.mjs`, translate it, add a flag in `assets/flags/`, add the code to `languages` in `config.mjs` and run `node site/scripts/og.mjs`.

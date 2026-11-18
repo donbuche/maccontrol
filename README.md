@@ -100,7 +100,7 @@ Without the certificate from `setup-signing.sh`, every build gets a new ad-hoc s
 
 ### Screenshots of the app
 
-`maccontrol --screenshot <file.png> --page <home|trackpad|keyboard|mouse|snapping|settings>` opens the window with sample rules, saves a picture of it and quits. It doesn't read or change your settings. Set `MACCONTROL_LANG=en|es|ca` to pick the language.
+`maccontrol --screenshot <file.png> --page <home|trackpad|keyboard|mouse|snapping|settings>` opens the window with sample rules, saves a picture of it and quits. It doesn't read or change your settings. Set `MACCONTROL_LANG=en|es|ca` to pick the language, and add `--scale <n>` to draw it at `n` pixels per point (for example `--scale 1.8` for Retina-quality pictures on any display; the window can't be taller than the screen).
 
 ### Translations
 

@@ -151,8 +151,8 @@ function langSwitcher({ t, alternates, asset }) {
 }
 
 function shot(ctx, name, { alt, eager = false, sizes = '(min-width: 1024px) 50vw, 100vw' }) {
-  const src = ctx.asset(`img/screens/${name}.webp`);
-  const sm = ctx.asset(`img/screens/${name}-800.webp`);
+  const src = ctx.asset(`img/screens/${ctx.t.lang}/${name}.webp`);
+  const sm = ctx.asset(`img/screens/${ctx.t.lang}/${name}-800.webp`);
   return `<img src="${src}" srcset="${sm} 800w, ${src} 1600w" sizes="${sizes}" width="${SHOT_W}" height="${SHOT_H}" alt="${esc(alt)}"${
     eager ? ' fetchpriority="high"' : ' loading="lazy"'
   } decoding="async">`;
@@ -310,7 +310,7 @@ function gallery(ctx) {
     .map(
       ([name, caption], i) => `<li data-reveal>
           <figure class="shot">
-            <button type="button" class="shot__btn" data-shot="${i}" data-full="${ctx.asset(`img/screens/${name}.webp`)}" aria-label="${esc(fill(g.open, { caption }))}">
+            <button type="button" class="shot__btn" data-shot="${i}" data-full="${ctx.asset(`img/screens/${t.lang}/${name}.webp`)}" aria-label="${esc(fill(g.open, { caption }))}">
               ${shot(ctx, name, { alt: caption, sizes: '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw' })}
               <span class="shot__zoom" aria-hidden="true">${icons.zoom}</span>
             </button>
@@ -462,7 +462,7 @@ function jsonLd(ctx) {
         description: t.meta.description,
         url: pageUrl,
         image: abs('icons/icon-512.png'),
-        screenshot: Object.keys(t.gallery.items).map((s) => abs(`img/screens/${s}.webp`)),
+        screenshot: Object.keys(t.gallery.items).map((s) => abs(`img/screens/${t.lang}/${s}.webp`)),
         applicationCategory: 'UtilitiesApplication',
         operatingSystem: 'macOS 12 or later',
         softwareVersion: version,

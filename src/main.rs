@@ -62,10 +62,18 @@ fn main() -> eframe::Result {
         .map(PathBuf::from);
     // Which page to open on (used to picture each page).
     let page = args.iter().position(|a| a == "--page").and_then(|i| args.get(i + 1)).cloned();
+    // Pictures drawn at this many pixels per point (2 = Retina quality on any display).
+    let scale = args
+        .iter()
+        .position(|a| a == "--scale")
+        .and_then(|i| args.get(i + 1))
+        .and_then(|s| s.parse::<f32>().ok())
+        .filter(|s| screenshot.is_some() && *s >= 1.0)
+        .unwrap_or(1.0);
 
     let mut viewport = egui::ViewportBuilder::default()
         .with_title("MacControl")
-        .with_inner_size([1180.0, 760.0])
+        .with_inner_size([1180.0 * scale, 760.0 * scale])
         .with_min_inner_size([960.0, 620.0])
         .with_fullsize_content_view(true)
         .with_titlebar_shown(false)
@@ -85,5 +93,5 @@ fn main() -> eframe::Result {
             b.with_activate_ignoring_other_apps(false);
         }));
     }
-    eframe::run_native("MacControl", options, Box::new(move |cc| Ok(Box::new(ui::MacApp::new(cc, screenshot, page)))))
+    eframe::run_native("MacControl", options, Box::new(move |cc| Ok(Box::new(ui::MacApp::new(cc, screenshot, page, scale)))))
 }
