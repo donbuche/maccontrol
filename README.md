@@ -22,6 +22,7 @@
   <img alt="Platform" src="https://img.shields.io/badge/platform-macOS_12%2B-000000?logo=apple&logoColor=white" />
   <img alt="Apple silicon" src="https://img.shields.io/badge/Apple_silicon-arm64-22D3EE" />
   <img alt="Website" src="https://img.shields.io/badge/website-EN_%7C_ES_%7C_CA-8B5CF6" />
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-34D399" /></a>
 </p>
 
 <p align="center">
@@ -133,4 +134,6 @@ Mac, macOS, Magic Trackpad and Mission Control are trademarks of Apple Inc. MacC
 
 ## License
 
-© Joan Galtés i Moreno · [Ariane webdesign](https://arianewebdesign.com). All rights reserved.
+[MIT](LICENSE) © Joan Galtés i Moreno · [Ariane webdesign](https://arianewebdesign.com).
+
+The click sound keeps its own licence (CC-BY-SA) and the website fonts theirs (SIL Open Font License); see [Credits](#credits).
