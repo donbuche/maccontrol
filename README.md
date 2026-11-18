@@ -21,6 +21,7 @@
   <img alt="egui" src="https://img.shields.io/badge/egui%20%2F%20eframe-0.37-4B7BEC" />
   <img alt="Platform" src="https://img.shields.io/badge/platform-macOS_12%2B-000000?logo=apple&logoColor=white" />
   <img alt="Apple silicon" src="https://img.shields.io/badge/Apple_silicon-arm64-22D3EE" />
+  <img alt="App languages" src="https://img.shields.io/badge/app-EN_%7C_ES_%7C_CA-F472B6" />
   <img alt="Website" src="https://img.shields.io/badge/website-EN_%7C_ES_%7C_CA-8B5CF6" />
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-34D399" /></a>
 </p>
@@ -39,9 +40,8 @@
 - **Window snapping.** Drag a window to the left or right edge for a half, to the top to maximise it and to a corner for a quarter. A preview shows where it will land, sizes and margins are adjustable, and dragging a snapped window away gives it its old size back. Apps can be excluded.
 - **Actions.** Place the window (halves, thirds, two thirds, quarters, maximise, centre), move it to the next display, restore its size, minimise the window under the cursor, Mission Control, App Exposé, show desktop, Launchpad, lock screen, screenshot, volume, left/right/middle click, send a keyboard shortcut, open an app or a URL, type text or run a shell command.
 - **Per-app rules.** Every rule works in all apps or only in one; a rule made for an app wins over a general one.
-- **Lives in the menu bar.** While its window is open MacControl has a Dock icon; closing the window (red button, ⌘W or ⌘Q) leaves it running from its top-hat icon in the menu bar. It only quits from that icon's menu. Rules can be paused from there too.
-
-The interface is in Spanish for now.
+- **Lives in the menu bar.** While its window is open MacControl has a Dock icon; closing the window (red button, ⌘W or ⌘Q) leaves it running from its top-hat icon in the menu bar. It only quits from that icon's menu. Rules can be paused from there too. ⌘, opens Settings.
+- **In your language.** The interface is available in English, Spanish and Catalan. On first launch MacControl follows your Mac's language (English if it's none of the three), and you can switch it any time in **Settings → General**.
 
 ## Screenshots
 
@@ -94,13 +94,17 @@ cargo run --release
 | `./scripts/package-macos.sh` | Build `dist/MacControl.app` and `dist/MacControl-<version>.dmg` (`--no-dmg` for the app only) |
 | `./scripts/setup-signing.sh` | Once per Mac: create a local code-signing certificate so macOS keeps the Accessibility permission across rebuilds |
 | `./scripts/render-icons.sh` | Render `assets/icon.svg`, `assets/logo.svg` and `assets/tray.svg` into the PNGs the app embeds (needs Google Chrome) |
-| `cargo test` | Run the tests (gesture recognition, snapping zones, rule lookup, icons) |
+| `cargo test` | Run the tests (gesture recognition, snapping zones, rule lookup, translations, icons) |
 
 Without the certificate from `setup-signing.sh`, every build gets a new ad-hoc signature and macOS asks for Accessibility again.
 
 ### Screenshots of the app
 
-`maccontrol --screenshot <file.png> --page <home|trackpad|keyboard|mouse|snapping|settings>` opens the window with sample rules, saves a picture of it and quits. It doesn't read or change your settings.
+`maccontrol --screenshot <file.png> --page <home|trackpad|keyboard|mouse|snapping|settings>` opens the window with sample rules, saves a picture of it and quits. It doesn't read or change your settings. Set `MACCONTROL_LANG=en|es|ca` to pick the language.
+
+### Translations
+
+Texts are written in English in the code and wrapped in `tl("…")` (or `tlf("…", &[…])` when they have `{}` placeholders). Their Spanish and Catalan versions live in the table in [`src/i18n.rs`](src/i18n.rs); a test fails if a text in the code is missing from it.
 
 ## Project structure
 
@@ -109,6 +113,7 @@ src/
   main.rs         Window setup and the embedded icons
   engine.rs       Shared state: config, recording, the last event, the front app
   model.rs        Rules, triggers, actions and settings (what is saved)
+  i18n.rs         Interface languages, translations and the language picker
   gestures.rs     Trackpad gesture recogniser
   snap.rs         Snapping zones and target rectangles
   mechanics.rs    Tuning values for gestures and snapping

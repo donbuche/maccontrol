@@ -138,7 +138,7 @@ export default {
       'La primera vegada, macOS dirà que no pot comprovar l’app. Ves a <strong>Configuració del Sistema → Privadesa i seguretat</strong> i fes clic a <strong>Obre igualment</strong>.',
       'Permet MacControl a <strong>Privadesa i seguretat → Accessibilitat</strong> (i a <strong>Monitoratge de l’entrada</strong> si t’ho demana). Ho necessita per llegir les dreceres i moure les finestres.',
     ],
-    note: 'Requereix macOS 12 o posterior en un Mac amb xip d’Apple. Per ara, la interfície de l’app és en castellà.',
+    note: 'Requereix macOS 12 o posterior en un Mac amb xip d’Apple.',
     cta: 'Descarregar l’última versió',
   },
 
@@ -152,7 +152,7 @@ export default {
       { q: 'macOS diu que no pot obrir l’app. Què faig?', a: 'MacControl encara no està notaritzada per Apple. Ves a <strong>Configuració del Sistema → Privadesa i seguretat</strong> i fes clic a <strong>Obre igualment</strong> al costat del missatge sobre MacControl. Només cal fer-ho una vegada.' },
       { q: 'En quins Macs funciona?', a: 'En Macs amb xip d’Apple (M1 o posterior) amb macOS 12 Monterey o posterior. Els gestos necessiten el trackpad del portàtil o un Magic Trackpad.' },
       { q: 'Què passa quan tanco la finestra?', a: 'MacControl continua funcionant des de la icona del barret de copa a la barra de menús, i la icona del Dock desapareix. Per tancar-la del tot, tria <strong>Salir de MacControl</strong> (Sortir) al menú d’aquesta icona.' },
-      { q: 'En quin idioma és l’app?', a: 'Per ara, en castellà. Les dreceres i els gestos funcionen igual sigui quin sigui l’idioma del teu Mac.' },
+      { q: 'En quin idioma és l’app?', a: 'En català, castellà i anglès: fa servir l’idioma del teu Mac i el pots canviar a la Configuració.' },
     ],
   },
 
