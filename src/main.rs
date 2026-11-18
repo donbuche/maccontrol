@@ -3,6 +3,7 @@
 mod engine;
 #[allow(dead_code)]
 mod gestures;
+mod i18n;
 mod mac;
 #[allow(dead_code)]
 mod mechanics;

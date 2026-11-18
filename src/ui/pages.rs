@@ -4,6 +4,7 @@ use super::icons::{self, Icon};
 use super::theme::*;
 use super::{MacApp, Page, RecTarget};
 use crate::engine::{engine, Recorded};
+use crate::i18n::{self, tl, tlf};
 use crate::model::*;
 use crate::snap::{target_rect, R};
 use eframe::egui::{self, Color32, Pos2, Rect, RichText, Sense, Stroke, StrokeKind, Vec2};
@@ -42,7 +43,7 @@ pub fn header(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
             ui.label(RichText::new(app.page.subtitle()).color(MUTED));
         });
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            if app.page.is_rules() && primary_button(ui, "+  Nueva regla").clicked() {
+            if app.page.is_rules() && primary_button(ui, tl("+  New rule")).clicked() {
                 add_trigger(app, cfg, None);
             }
         });
@@ -127,21 +128,21 @@ pub fn home(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
         app.draw_logo(ui, logo);
         let mut child = ui.new_child(egui::UiBuilder::new().max_rect(Rect::from_min_max(Pos2::new(logo.right() + 34.0, hero.top() + 34.0), hero.max - Vec2::new(28.0, 20.0))));
         child.spacing_mut().item_spacing.y = 6.0;
-        child.label(RichText::new("Bienvenido a MacControl").size(30.0).strong().color(TEXT));
+        child.label(RichText::new(tl("Welcome to MacControl")).size(30.0).strong().color(TEXT));
         child.label(
-            RichText::new("Controla tu Mac con gestos del trackpad, atajos de teclado y botones del ratón, y coloca las ventanas solo con arrastrarlas a los bordes de la pantalla.")
+            RichText::new(tl("Control your Mac with trackpad gestures, keyboard shortcuts and mouse buttons, and place windows just by dragging them to the edges of the screen."))
                 .size(14.0)
                 .color(MUTED),
         );
         child.add_space(4.0);
         child.horizontal(|ui| {
             let n = cfg.triggers.iter().filter(|t| t.enabled).count();
-            pill(ui, &format!("{n} reglas activas"), GREEN);
+            pill(ui, &tlf("{} active rules", &[&n]), GREEN);
             if cfg.snap.enabled {
-                pill(ui, "Ajuste de ventanas activado", Color32::from_rgb(120, 220, 255));
+                pill(ui, tl("Window snapping on"), Color32::from_rgb(120, 220, 255));
             }
             if cfg.paused {
-                pill(ui, "En pausa", AMBER);
+                pill(ui, tl("Paused"), AMBER);
             }
         });
         ui.add_space(14.0);
@@ -156,11 +157,11 @@ pub fn home(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                     ui.painter().text(r.center(), egui::Align2::CENTER_CENTER, "!", egui::FontId::proportional(20.0), Color32::WHITE);
                     ui.vertical(|ui| {
                         ui.spacing_mut().item_spacing.y = 2.0;
-                        ui.label(RichText::new("Primer paso: da permiso de Accesibilidad").size(15.0).strong());
-                        ui.label(RichText::new("Sin él, macOS no deja que MacControl lea gestos y teclas ni mueva ventanas.").color(MUTED));
+                        ui.label(RichText::new(tl("First step: grant Accessibility permission")).size(15.0).strong());
+                        ui.label(RichText::new(tl("Without it, macOS won't let MacControl read gestures and keys or move windows.")).color(MUTED));
                     });
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if primary_button(ui, "Conceder permiso").clicked() {
+                        if primary_button(ui, tl("Grant permission")).clicked() {
                             crate::mac::ax::request_trust();
                         }
                     });
@@ -169,7 +170,7 @@ pub fn home(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
             ui.add_space(14.0);
         }
 
-        section_title(ui, "¿Qué quieres configurar?");
+        section_title(ui, tl("What do you want to set up?"));
         ui.add_space(4.0);
         let gap = 14.0;
         let cw = (ui.available_width() - gap) / 2.0;
@@ -194,15 +195,15 @@ pub fn home(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                     pr.galley(Pos2::new(tile.right() + 14.0, tile.top() + 28.0), g, MUTED);
                     let info = if p.is_rules() {
                         let n = cfg.triggers.iter().filter(|t| p.matches(&t.kind) && t.enabled).count();
-                        format!("{n} reglas activas")
+                        tlf("{} active rules", &[&n])
                     } else if cfg.snap.enabled {
-                        "Activado".to_string()
+                        tl("On").to_string()
                     } else {
-                        "Desactivado".to_string()
+                        tl("Off").to_string()
                     };
                     pr.text(Pos2::new(r2.left() + 18.0, r2.bottom() - 22.0), egui::Align2::LEFT_CENTER, info, egui::FontId::proportional(12.0), FAINT);
                     let arrow_x = r2.right() - 22.0 + 4.0 * h;
-                    pr.text(Pos2::new(arrow_x, r2.bottom() - 22.0), egui::Align2::RIGHT_CENTER, "Configurar  →", egui::FontId::proportional(12.5), lerp_color(MUTED, Color32::WHITE, h));
+                    pr.text(Pos2::new(arrow_x, r2.bottom() - 22.0), egui::Align2::RIGHT_CENTER, tl("Set up  →"), egui::FontId::proportional(12.5), lerp_color(MUTED, Color32::WHITE, h));
                     if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                         go = Some(*p);
                     }
@@ -215,12 +216,12 @@ pub fn home(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
         }
 
         ui.add_space(8.0);
-        section_title(ui, "Cómo funciona");
+        section_title(ui, tl("How it works"));
         ui.add_space(4.0);
         let steps = [
-            ("Elige qué haces", "Un gesto con los dedos, una combinación de teclas o un botón del ratón."),
-            ("Elige qué pasa", "Colocar una ventana, abrir una app, enviar un atajo, subir el volumen…"),
-            ("Y listo", "Funciona en todas las apps, o solo en las que tú elijas."),
+            (tl("Choose what you do"), tl("A finger gesture, a key combination or a mouse button.")),
+            (tl("Choose what happens"), tl("Place a window, open an app, send a shortcut, turn the volume up…")),
+            (tl("That's it"), tl("It works in every app, or only in the ones you choose.")),
         ];
         let sw = (ui.available_width() - 2.0 * gap) / 3.0;
         ui.horizontal(|ui| {
@@ -273,11 +274,11 @@ pub fn triggers(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                     live_trackpad(ui);
                     ui.add_space(10.0);
                 }
-                section_title(ui, &format!("Tus reglas ({})", ids.len()));
+                section_title(ui, &tlf("Your rules ({})", &[&ids.len()]));
                 ui.add_space(2.0);
                 rule_list(app, ui, cfg, &ids);
                 ui.add_space(10.0);
-                ideas(app, ui, cfg, "Más ideas");
+                ideas(app, ui, cfg, tl("More ideas"));
             });
         });
         ui.add_space(12.0);
@@ -290,7 +291,7 @@ pub fn triggers(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
     });
 }
 
-/// "Funciona en": every app or one in particular.
+/// tl("Works in"): every app or one in particular.
 fn scope_bar(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
     egui::Frame::new()
         .fill(glass(9))
@@ -300,22 +301,22 @@ fn scope_bar(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
         .show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.horizontal_wrapped(|ui| {
-                ui.label(RichText::new("Funciona en").color(MUTED));
+                ui.label(RichText::new(tl("Works in")).color(MUTED));
                 ui.add_space(4.0);
-                if chip(ui, "Todas las apps", app.scope.is_none()).clicked() {
+                if chip(ui, tl("All apps"), app.scope.is_none()).clicked() {
                     app.scope = None;
                     app.select(None);
                 }
                 let mut remove = None;
                 for (b, n) in cfg.apps.clone() {
                     let on = app.scope.as_deref() == Some(b.as_str());
-                    let r = chip(ui, &n, on).on_hover_text("Clic derecho para quitarla");
+                    let r = chip(ui, &n, on).on_hover_text(tl("Right-click to remove it"));
                     if r.clicked() {
                         app.scope = Some(b.clone());
                         app.select(None);
                     }
                     r.context_menu(|ui| {
-                        if ui.button("Quitar esta app y sus reglas").clicked() {
+                        if ui.button(tl("Remove this app and its rules")).clicked() {
                             remove = Some(b.clone());
                             ui.close();
                         }
@@ -328,14 +329,14 @@ fn scope_bar(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                         app.scope = None;
                     }
                 }
-                let add = ghost_button(ui, "+ Una app concreta");
+                let add = ghost_button(ui, tl("+ A specific app"));
                 egui::Popup::menu(&add).show(|ui| {
                     ui.set_min_width(230.0);
-                    ui.label(RichText::new("Apps abiertas ahora").size(11.0).color(FAINT));
+                    ui.label(RichText::new(tl("Apps open now")).size(11.0).color(FAINT));
                     egui::ScrollArea::vertical().max_height(300.0).show(ui, |ui| {
                         let running = app.running_apps.clone();
                         if running.is_empty() {
-                            ui.label(RichText::new("Abre la app que quieras y vuelve aquí.").color(MUTED));
+                            ui.label(RichText::new(tl("Open the app you want and come back here.")).color(MUTED));
                         }
                         for (b, n) in running {
                             if cfg.apps.iter().any(|(x, _)| *x == b) {
@@ -351,7 +352,7 @@ fn scope_bar(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                     });
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.label(RichText::new("Las reglas de una app concreta mandan sobre las generales").size(11.5).color(FAINT));
+                    ui.label(RichText::new(tl("Rules for a specific app take priority over general ones")).size(11.5).color(FAINT));
                 });
             });
         });
@@ -368,19 +369,19 @@ fn empty_state(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
             icon_tile(ui.painter(), r, pal.a, pal.b);
             icons::draw(ui.painter(), app.page.icon(), r.shrink(15.0), Color32::WHITE);
             ui.add_space(8.0);
-            let where_ = match &app.scope {
-                None => "para todas las apps".to_string(),
-                Some(b) => format!("para {}", app_name(cfg, &app.running_apps, b)),
+            let title = match &app.scope {
+                None => tl("You have no rules for all apps yet").to_string(),
+                Some(b) => tlf("You have no rules for {} yet", &[&app_name(cfg, &app.running_apps, b)]),
             };
-            ui.label(RichText::new(format!("Aún no tienes reglas {where_}")).size(18.0).strong());
-            ui.label(RichText::new("Empieza con una de estas ideas o crea la tuya.").color(MUTED));
+            ui.label(RichText::new(title).size(18.0).strong());
+            ui.label(RichText::new(tl("Start with one of these ideas or create your own.")).color(MUTED));
             ui.add_space(10.0);
-            if primary_button(ui, "+  Crear una regla").clicked() {
+            if primary_button(ui, tl("+  Create a rule")).clicked() {
                 add_trigger(app, cfg, None);
             }
             ui.add_space(10.0);
         });
-        ideas(app, ui, cfg, "Ideas para empezar");
+        ideas(app, ui, cfg, tl("Ideas to get started"));
     });
 }
 
@@ -397,7 +398,7 @@ fn ideas(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config, title: &str) {
     ui.horizontal_wrapped(|ui| {
         for (k, a) in list {
             let text = format!("+  {}  →  {}", short_kind(&k), a.label());
-            if ghost_button(ui, &text).on_hover_text("Añadir esta regla").clicked() {
+            if ghost_button(ui, &text).on_hover_text(tl("Add this rule")).clicked() {
                 chosen = Some((k, a));
             }
         }
@@ -410,14 +411,14 @@ fn ideas(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config, title: &str) {
 fn short_kind(k: &TriggerKind) -> String {
     match k {
         TriggerKind::Trackpad(g) => match g {
-            Gesture::Tap(n) => format!("Toque {n} dedos"),
-            Gesture::DoubleTap(n) => format!("Doble toque {n} dedos"),
-            Gesture::Click(n) => format!("Clic {n} dedos"),
-            Gesture::Swipe(n, d) => format!("{n} dedos {}", d.arrow()),
-            Gesture::CornerTap(_) => "Toque en esquina".into(),
-            Gesture::EdgeSwipe(d) => format!("1 dedo desde borde {}", d.arrow()),
-            Gesture::TipTap(Side::Left) => "TipTap izq.".into(),
-            Gesture::TipTap(Side::Right) => "TipTap dcha.".into(),
+            Gesture::Tap(n) => tlf("{}-finger tap", &[n]),
+            Gesture::DoubleTap(n) => tlf("{}-finger double tap", &[n]),
+            Gesture::Click(n) => tlf("{}-finger click", &[n]),
+            Gesture::Swipe(n, d) => tlf("{} fingers {}", &[n, &d.arrow()]),
+            Gesture::CornerTap(_) => tl("Corner tap").into(),
+            Gesture::EdgeSwipe(d) => tlf("1 finger from edge {}", &[&d.arrow()]),
+            Gesture::TipTap(Side::Left) => tl("TipTap left").into(),
+            Gesture::TipTap(Side::Right) => tl("TipTap right").into(),
         },
         _ => k.label(),
     }
@@ -511,7 +512,7 @@ fn kind_badge(kind: &TriggerKind) -> String {
 
 fn trigger_title(kind: &TriggerKind) -> String {
     match kind {
-        TriggerKind::Keyboard(k) if k.key == 0xFFFF => "Nuevo atajo: pulsa una combinación".into(),
+        TriggerKind::Keyboard(k) if k.key == 0xFFFF => tl("New shortcut: press a combination").into(),
         TriggerKind::Keyboard(k) => combo_parts(k.display_mods(), Some(key_name(k.key))).join(" "),
         _ => kind.label(),
     }
@@ -541,7 +542,7 @@ fn rule_list(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config, ids: &[u64])
         let g = p.layout(trigger_title(&t.kind), egui::FontId::proportional(14.5), tc, max_w);
         p.galley(Pos2::new(badge.right() + 14.0, r.top() + 14.0), g, tc);
         let none = matches!(t.action, Action::None);
-        let sub = if none { "Elige qué debe hacer →".to_string() } else { format!("→  {}", t.action.label()) };
+        let sub = if none { tl("Choose what it should do →").to_string() } else { format!("→  {}", t.action.label()) };
         let g2 = p.layout(sub, egui::FontId::proportional(12.5), if none { AMBER } else { MUTED }, max_w);
         p.galley(Pos2::new(badge.right() + 14.0, r.top() + 38.0), g2, MUTED);
         let sw = Rect::from_min_size(Pos2::new(r.right() - 56.0, r.center().y - 12.0), Vec2::new(42.0, 24.0));
@@ -579,17 +580,17 @@ fn live_trackpad(ui: &mut egui::Ui) {
             ui.add_space(8.0);
             ui.vertical(|ui| {
                 ui.spacing_mut().item_spacing.y = 3.0;
-                ui.label(RichText::new("Prueba tus gestos aquí").strong());
+                ui.label(RichText::new(tl("Try your gestures here")).strong());
                 let pads = eng.trackpads.load(Ordering::Relaxed);
                 match &last {
                     Some(l) if l.at.elapsed().as_secs() < 8 => {
                         ui.label(RichText::new(&l.what).color(Color32::WHITE).size(14.0));
-                        ui.label(RichText::new(l.action.clone().map(|a| format!("→ {a}")).unwrap_or_else(|| "Este gesto aún no tiene regla".into())).color(MUTED).size(12.0));
+                        ui.label(RichText::new(l.action.clone().map(|a| format!("→ {a}")).unwrap_or_else(|| tl("This gesture has no rule yet").into())).color(MUTED).size(12.0));
                     }
                     _ => {
-                        ui.label(RichText::new("Pon los dedos en el trackpad: verás qué gesto reconoce MacControl.").color(MUTED).size(12.5));
+                        ui.label(RichText::new(tl("Put your fingers on the trackpad to see which gesture MacControl recognizes.")).color(MUTED).size(12.5));
                         if pads == 0 && eng.started.load(Ordering::Relaxed) {
-                            ui.label(RichText::new("No se ha detectado ningún trackpad.").color(AMBER).size(12.0));
+                            ui.label(RichText::new(tl("No trackpad detected.")).color(AMBER).size(12.0));
                         }
                     }
                 }
@@ -624,36 +625,37 @@ fn editor(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
         card(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Editar regla").size(17.0).strong());
+                ui.label(RichText::new(tl("Edit rule")).size(17.0).strong());
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     toggle(ui, &mut t.enabled);
-                    ui.label(RichText::new(if t.enabled { "Activada" } else { "Desactivada" }).size(12.0).color(MUTED));
+                    ui.label(RichText::new(if t.enabled { tl("Enabled") } else { tl("Disabled") }).size(12.0).color(MUTED));
                 });
             });
             ui.add_space(10.0);
 
             let hint1 = match t.kind {
-                TriggerKind::Trackpad(_) => "El gesto que harás en el trackpad",
-                TriggerKind::Keyboard(_) => "La combinación de teclas que pulsarás",
-                TriggerKind::Mouse(_) => "El botón o la rueda que usarás",
+                TriggerKind::Trackpad(_) => tl("The gesture you'll make on the trackpad"),
+                TriggerKind::Keyboard(_) => tl("The key combination you'll press"),
+                TriggerKind::Mouse(_) => tl("The button or wheel you'll use"),
             };
-            step_title(ui, 1, "Cuando yo…", hint1);
+            step_title(ui, 1, tl("When I…"), hint1);
             ui.add_space(6.0);
             ui.indent("s1", |ui| match &mut t.kind {
                 TriggerKind::Trackpad(g) => gesture_picker(ui, g),
                 TriggerKind::Keyboard(k) => {
                     let recording = rec == Some(RecTarget::TriggerKey(id));
                     if recording {
-                        recording_box(ui, "Pulsa ahora la combinación de teclas…");
+                        recording_box(ui, tl("Press the key combination now…"));
                     } else if k.key == 0xFFFF {
-                        ui.label(RichText::new("Todavía no hay combinación").color(AMBER));
+                        ui.label(RichText::new(tl("No combination yet")).color(AMBER));
                     } else {
                         keycaps(ui, &combo_parts(k.display_mods(), Some(key_name(k.key))), true);
                         if let Some((arrow, name)) = fn_arrow_key(k.key) {
                             ui.add_space(4.0);
                             ui.label(
-                                RichText::new(format!(
-                                    "⚠ En el Mac, fn + {arrow} es la tecla {name}. Mientras esta regla esté activa, {name} dejará de funcionar en todas las apps."
+                                RichText::new(tlf(
+                                    "⚠ On a Mac, fn + {} is the {} key. While this rule is on, {} will stop working in every app.",
+                                    &[&arrow, &name, &name],
                                 ))
                                 .size(12.0)
                                 .color(AMBER),
@@ -662,10 +664,10 @@ fn editor(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                     }
                     ui.add_space(6.0);
                     if recording {
-                        if ghost_button(ui, "Cancelar").clicked() {
+                        if ghost_button(ui, tl("Cancel")).clicked() {
                             stop_rec = true;
                         }
-                    } else if ghost_button(ui, "●  Grabar combinación").clicked() {
+                    } else if ghost_button(ui, tl("●  Record combination")).clicked() {
                         start_rec = Some(RecTarget::TriggerKey(id));
                     }
                 }
@@ -673,20 +675,20 @@ fn editor(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
             });
             divider(ui);
 
-            step_title(ui, 2, "MacControl hará…", "Lo que pasará cada vez");
+            step_title(ui, 2, tl("MacControl will…"), tl("What will happen each time"));
             ui.add_space(6.0);
             ui.indent("s2", |ui| action_editor(ui, &mut t.action, rec == Some(RecTarget::ActionKey(id)), &mut start_rec, &mut stop_rec, id));
             divider(ui);
 
-            step_title(ui, 3, "Funciona en…", "Todas las apps o solo una");
+            step_title(ui, 3, tl("Works in…"), tl("Every app or just one"));
             ui.add_space(6.0);
             ui.indent("s3", |ui| {
                 let cur = match &t.app {
-                    None => "Todas las apps".to_string(),
+                    None => tl("All apps").to_string(),
                     Some(b) => apps_choice.iter().find(|(x, _)| x == b).map(|(_, n)| n.clone()).unwrap_or(b.clone()),
                 };
                 egui::ComboBox::from_id_salt("scope").selected_text(cur).width(240.0).show_ui(ui, |ui| {
-                    ui.selectable_value(&mut t.app, None, "Todas las apps");
+                    ui.selectable_value(&mut t.app, None, tl("All apps"));
                     for (b, n) in &apps_choice {
                         ui.selectable_value(&mut t.app, Some(b.clone()), n);
                     }
@@ -694,9 +696,9 @@ fn editor(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
             });
             ui.add_space(14.0);
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Los cambios se guardan solos.").size(11.5).color(FAINT));
+                ui.label(RichText::new(tl("Changes are saved automatically.")).size(11.5).color(FAINT));
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if danger_button(ui, "Eliminar regla").clicked() {
+                    if danger_button(ui, tl("Delete rule")).clicked() {
                         delete = true;
                     }
                 });
@@ -763,7 +765,7 @@ fn gesture_picker(ui: &mut egui::Ui, g: &mut Gesture) {
         draw_gesture(ui, r, *g);
         ui.vertical(|ui| {
             ui.label(RichText::new(g.label()).size(15.0).strong());
-            egui::ComboBox::from_id_salt("gesture").selected_text("Elegir otro gesto").width(220.0).height(380.0).show_ui(ui, |ui| {
+            egui::ComboBox::from_id_salt("gesture").selected_text(tl("Choose another gesture")).width(220.0).height(380.0).show_ui(ui, |ui| {
                 for (group, items) in Gesture::catalogue() {
                     ui.label(RichText::new(group).size(11.0).color(FAINT));
                     for it in items {
@@ -832,7 +834,7 @@ fn draw_gesture(ui: &egui::Ui, r: Rect, g: Gesture) {
         p.arrow(from, v, Stroke::new(2.0, TEXT));
     }
     if matches!(g, Gesture::Click(_)) {
-        p.text(r.center_bottom() + Vec2::new(0.0, -9.0), egui::Align2::CENTER_CENTER, "clic", egui::FontId::proportional(10.0), MUTED);
+        p.text(r.center_bottom() + Vec2::new(0.0, -9.0), egui::Align2::CENTER_CENTER, tl("click"), egui::FontId::proportional(10.0), MUTED);
     }
     if matches!(g, Gesture::DoubleTap(_)) {
         p.text(r.center_bottom() + Vec2::new(0.0, -9.0), egui::Align2::CENTER_CENTER, "×2", egui::FontId::proportional(10.0), MUTED);
@@ -842,7 +844,7 @@ fn draw_gesture(ui: &egui::Ui, r: Rect, g: Gesture) {
 fn mods_chips(ui: &mut egui::Ui, mods: &mut u64) {
     ui.horizontal_wrapped(|ui| {
         ui.spacing_mut().item_spacing.x = 6.0;
-        for (bit, label) in [(MOD_CTRL, "⌃ control"), (MOD_OPT, "⌥ opción"), (MOD_SHIFT, "⇧ mayús"), (MOD_CMD, "⌘ comando")] {
+        for (bit, label) in [(MOD_CTRL, "⌃ control"), (MOD_OPT, tl("⌥ option")), (MOD_SHIFT, tl("⇧ shift")), (MOD_CMD, tl("⌘ command"))] {
             if chip(ui, label, *mods & bit != 0).clicked() {
                 *mods ^= bit;
             }
@@ -853,10 +855,10 @@ fn mods_chips(ui: &mut egui::Ui, mods: &mut u64) {
 fn mouse_picker(ui: &mut egui::Ui, m: &mut MouseTrigger, recording: bool, start: &mut Option<RecTarget>, stop: &mut bool, id: u64) {
     let is_scroll = matches!(m, MouseTrigger::Scroll { .. });
     ui.horizontal(|ui| {
-        if chip(ui, "Un botón", !is_scroll).clicked() && is_scroll {
+        if chip(ui, tl("A button"), !is_scroll).clicked() && is_scroll {
             *m = MouseTrigger::Button { button: 2, mods: 0 };
         }
-        if chip(ui, "La rueda + teclas", is_scroll).clicked() && !is_scroll {
+        if chip(ui, tl("The wheel + keys"), is_scroll).clicked() && !is_scroll {
             *m = MouseTrigger::Scroll { dir: Wheel::Up, mods: MOD_OPT };
         }
     });
@@ -864,7 +866,7 @@ fn mouse_picker(ui: &mut egui::Ui, m: &mut MouseTrigger, recording: bool, start:
     match m {
         MouseTrigger::Button { button, mods } => {
             if recording {
-                recording_box(ui, "Pulsa ahora un botón del ratón (central, lateral…)");
+                recording_box(ui, tl("Press a mouse button now (middle, side…)"));
             } else {
                 ui.label(RichText::new(MouseTrigger::Button { button: *button, mods: *mods }.label()).size(15.0).strong());
             }
@@ -876,52 +878,52 @@ fn mouse_picker(ui: &mut egui::Ui, m: &mut MouseTrigger, recording: bool, start:
                     }
                 });
                 if recording {
-                    if ghost_button(ui, "Cancelar").clicked() {
+                    if ghost_button(ui, tl("Cancel")).clicked() {
                         *stop = true;
                     }
-                } else if ghost_button(ui, "●  Grabar botón").clicked() {
+                } else if ghost_button(ui, tl("●  Record button")).clicked() {
                     *start = Some(RecTarget::TriggerMouse(id));
                 }
             });
             ui.add_space(4.0);
-            ui.label(RichText::new("Mientras mantengo pulsadas (opcional)").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("While holding down (optional)")).size(12.0).color(MUTED));
             mods_chips(ui, mods);
         }
         MouseTrigger::Scroll { dir, mods } => {
             ui.horizontal(|ui| {
-                if chip(ui, "Rueda hacia arriba", *dir == Wheel::Up).clicked() {
+                if chip(ui, tl("Wheel up"), *dir == Wheel::Up).clicked() {
                     *dir = Wheel::Up;
                 }
-                if chip(ui, "Rueda hacia abajo", *dir == Wheel::Down).clicked() {
+                if chip(ui, tl("Wheel down"), *dir == Wheel::Down).clicked() {
                     *dir = Wheel::Down;
                 }
             });
             ui.add_space(4.0);
-            ui.label(RichText::new("Mientras mantengo pulsada al menos una de estas teclas").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("While holding down at least one of these keys")).size(12.0).color(MUTED));
             mods_chips(ui, mods);
             if *mods == 0 {
-                ui.label(RichText::new("Elige al menos una tecla: la rueda sola sigue desplazando como siempre.").size(12.0).color(AMBER));
+                ui.label(RichText::new(tl("Choose at least one key: the wheel alone keeps scrolling as usual.")).size(12.0).color(AMBER));
             }
         }
     }
 }
 
 const ACTION_KINDS: [&str; 8] = [
-    "Nada todavía",
-    "Pulsar un atajo de teclado",
-    "Colocar la ventana",
-    "Una acción del sistema",
-    "Abrir una app",
-    "Abrir un enlace o archivo",
-    "Escribir un texto",
-    "Ejecutar un comando",
+    "Nothing yet",
+    "Press a keyboard shortcut",
+    "Place the window",
+    "A system action",
+    "Open an app",
+    "Open a link or file",
+    "Type some text",
+    "Run a command",
 ];
 
 fn action_editor(ui: &mut egui::Ui, a: &mut Action, recording: bool, start: &mut Option<RecTarget>, stop: &mut bool, id: u64) {
     let mut kind = a.kind_index();
-    egui::ComboBox::from_id_salt("action_kind").selected_text(ACTION_KINDS[kind]).width(260.0).show_ui(ui, |ui| {
+    egui::ComboBox::from_id_salt("action_kind").selected_text(tl(ACTION_KINDS[kind])).width(260.0).show_ui(ui, |ui| {
         for (i, k) in ACTION_KINDS.iter().enumerate() {
-            ui.selectable_value(&mut kind, i, *k);
+            ui.selectable_value(&mut kind, i, tl(k));
         }
     });
     if kind != a.kind_index() {
@@ -942,29 +944,29 @@ fn action_editor(ui: &mut egui::Ui, a: &mut Action, recording: bool, start: &mut
     ui.add_space(8.0);
     match a {
         Action::None => {
-            ui.label(RichText::new("Elige arriba qué quieres que pase.").color(AMBER));
+            ui.label(RichText::new(tl("Choose above what you want to happen.")).color(AMBER));
         }
         Action::Shortcut(k) => {
             if recording {
-                recording_box(ui, "Pulsa ahora el atajo que MacControl debe enviar…");
+                recording_box(ui, tl("Press the shortcut MacControl should send now…"));
             } else if k.key == 0xFFFF {
-                ui.label(RichText::new("Graba el atajo que se enviará").color(MUTED));
+                ui.label(RichText::new(tl("Record the shortcut to send")).color(MUTED));
             } else {
                 keycaps(ui, &combo_parts(k.display_mods(), Some(key_name(k.key))), true);
             }
             ui.add_space(6.0);
             if recording {
-                if ghost_button(ui, "Cancelar").clicked() {
+                if ghost_button(ui, tl("Cancel")).clicked() {
                     *stop = true;
                 }
-            } else if ghost_button(ui, "●  Grabar atajo").clicked() {
+            } else if ghost_button(ui, tl("●  Record shortcut")).clicked() {
                 *start = Some(RecTarget::ActionKey(id));
             }
         }
         Action::Window(pos) => window_grid(ui, pos),
         Action::System(s) => {
             egui::ComboBox::from_id_salt("system").selected_text(s.label()).width(260.0).height(420.0).show_ui(ui, |ui| {
-                for group in ["Sistema", "Ventanas", "Sonido", "Ratón"] {
+                for group in [tl("System"), tl("Windows"), tl("Sound"), tl("Mouse")] {
                     ui.label(RichText::new(group).size(11.0).color(FAINT));
                     for it in SystemAction::ALL.iter().filter(|x| x.group() == group) {
                         ui.selectable_value(s, *it, it.label());
@@ -974,20 +976,20 @@ fn action_editor(ui: &mut egui::Ui, a: &mut Action, recording: bool, start: &mut
             });
         }
         Action::OpenApp(name) => {
-            ui.label(RichText::new("Nombre de la app (por ejemplo «Safari» o «Notas»)").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("App name (for example “Safari” or “Notes”)")).size(12.0).color(MUTED));
             ui.add(egui::TextEdit::singleline(name).hint_text("Safari").desired_width(f32::INFINITY));
         }
         Action::OpenUrl(u) => {
-            ui.label(RichText::new("Dirección web o ruta de un archivo o carpeta").size(12.0).color(MUTED));
-            ui.add(egui::TextEdit::singleline(u).hint_text("https://www.apple.com/es").desired_width(f32::INFINITY));
+            ui.label(RichText::new(tl("Web address or path to a file or folder")).size(12.0).color(MUTED));
+            ui.add(egui::TextEdit::singleline(u).hint_text("https://www.apple.com").desired_width(f32::INFINITY));
         }
         Action::TypeText(t) => {
-            ui.label(RichText::new("Texto que se escribirá donde esté el cursor").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Text to type wherever the cursor is")).size(12.0).color(MUTED));
             ui.add(egui::TextEdit::multiline(t).desired_rows(3).desired_width(f32::INFINITY));
         }
         Action::Shell(c) => {
-            ui.label(RichText::new("Orden de Terminal (se ejecuta con sh)").size(12.0).color(MUTED));
-            ui.add(egui::TextEdit::singleline(c).code_editor().hint_text("say hola").desired_width(f32::INFINITY));
+            ui.label(RichText::new(tl("Terminal command (run with sh)")).size(12.0).color(MUTED));
+            ui.add(egui::TextEdit::singleline(c).code_editor().hint_text(tl("say hello")).desired_width(f32::INFINITY));
         }
     }
 }
@@ -1029,7 +1031,7 @@ fn window_grid(ui: &mut egui::Ui, pos: &mut WindowPos) {
         }
     });
     ui.add_space(4.0);
-    ui.label(RichText::new(format!("La ventana activa irá a: {}", pos.label())).color(MUTED).size(12.0));
+    ui.label(RichText::new(tlf("The active window will go to: {}", &[&pos.label()])).color(MUTED).size(12.0));
 }
 
 /// Where a window would go, as fractions of a 1000-point screen (for the small drawings).
@@ -1040,21 +1042,21 @@ fn unit_target(p: WindowPos, s: &SnapSettings, current: Option<R>) -> R {
 
 fn short_pos(p: WindowPos) -> &'static str {
     match p {
-        WindowPos::Maximize => "Maximizar",
-        WindowPos::LeftHalf => "Mitad izq.",
-        WindowPos::RightHalf => "Mitad dcha.",
-        WindowPos::TopHalf => "Arriba",
-        WindowPos::BottomHalf => "Abajo",
-        WindowPos::TopLeft => "Sup. izq.",
-        WindowPos::TopRight => "Sup. dcha.",
-        WindowPos::BottomLeft => "Inf. izq.",
-        WindowPos::BottomRight => "Inf. dcha.",
-        WindowPos::LeftThird => "1/3 izq.",
-        WindowPos::CenterThird => "1/3 centro",
-        WindowPos::RightThird => "1/3 dcha.",
-        WindowPos::LeftTwoThirds => "2/3 izq.",
-        WindowPos::RightTwoThirds => "2/3 dcha.",
-        WindowPos::Center => "Centrar",
+        WindowPos::Maximize => tl("Maximize"),
+        WindowPos::LeftHalf => tl("L. half"),
+        WindowPos::RightHalf => tl("R. half"),
+        WindowPos::TopHalf => tl("Top"),
+        WindowPos::BottomHalf => tl("Bottom"),
+        WindowPos::TopLeft => tl("Top L."),
+        WindowPos::TopRight => tl("Top R."),
+        WindowPos::BottomLeft => tl("Bottom L."),
+        WindowPos::BottomRight => tl("Bottom R."),
+        WindowPos::LeftThird => tl("L. 1/3"),
+        WindowPos::CenterThird => tl("Mid 1/3"),
+        WindowPos::RightThird => tl("R. 1/3"),
+        WindowPos::LeftTwoThirds => tl("L. 2/3"),
+        WindowPos::RightTwoThirds => tl("R. 2/3"),
+        WindowPos::Center => tl("Center"),
     }
 }
 
@@ -1072,8 +1074,8 @@ pub fn snapping(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                     ui.horizontal(|ui| {
                         ui.vertical(|ui| {
                             ui.spacing_mut().item_spacing.y = 2.0;
-                            ui.label(RichText::new("Ajustar al arrastrar").size(16.0).strong());
-                            ui.label(RichText::new("Arrastra una ventana por su barra de título hasta un borde y suéltala.").color(MUTED).size(12.5));
+                            ui.label(RichText::new(tl("Snap when dragging")).size(16.0).strong());
+                            ui.label(RichText::new(tl("Drag a window by its title bar to an edge and let go.")).color(MUTED).size(12.5));
                         });
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             toggle(ui, &mut s.enabled);
@@ -1082,18 +1084,18 @@ pub fn snapping(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                     ui.add_space(12.0);
                     screen_diagram(app, ui, s);
                     ui.add_space(10.0);
-                    ui.label(RichText::new("Qué bordes funcionan").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Which edges work")).size(12.0).color(MUTED));
                     ui.horizontal_wrapped(|ui| {
-                        if chip(ui, "◧  Izquierda: mitad", s.left).clicked() {
+                        if chip(ui, tl("◧  Left: half"), s.left).clicked() {
                             s.left = !s.left;
                         }
-                        if chip(ui, "◨  Derecha: mitad", s.right).clicked() {
+                        if chip(ui, tl("◨  Right: half"), s.right).clicked() {
                             s.right = !s.right;
                         }
-                        if chip(ui, "⬒  Arriba: maximizar", s.top).clicked() {
+                        if chip(ui, tl("⬒  Top: maximize"), s.top).clicked() {
                             s.top = !s.top;
                         }
-                        if chip(ui, "◰  Esquinas: cuartos", s.corners).clicked() {
+                        if chip(ui, tl("◰  Corners: quarters"), s.corners).clicked() {
                             s.corners = !s.corners;
                         }
                     });
@@ -1101,18 +1103,18 @@ pub fn snapping(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                 ui.add_space(10.0);
                 card(ui, |ui| {
                     ui.set_width(ui.available_width());
-                    section_title(ui, "Excepciones");
-                    ui.label(RichText::new("Apps en las que las ventanas no se ajustan").color(MUTED).size(12.0));
+                    section_title(ui, tl("Exceptions"));
+                    ui.label(RichText::new(tl("Apps whose windows don't snap")).color(MUTED).size(12.0));
                     ui.add_space(4.0);
                     let mut remove = None;
                     ui.horizontal_wrapped(|ui| {
                         for b in &s.excluded_apps {
                             let n = app_name(&Config::default(), &app.running_apps, b);
-                            if chip(ui, &format!("{n}  ×"), false).on_hover_text("Quitar").clicked() {
+                            if chip(ui, &format!("{n}  ×"), false).on_hover_text(tl("Remove")).clicked() {
                                 remove = Some(b.clone());
                             }
                         }
-                        let add = ghost_button(ui, "+ Añadir app");
+                        let add = ghost_button(ui, tl("+ Add app"));
                         egui::Popup::menu(&add).show(|ui| {
                             egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
                                 for (b, n) in &app.running_apps {
@@ -1135,21 +1137,21 @@ pub fn snapping(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
             egui::ScrollArea::vertical().id_salt("snapopts").show(ui, |ui| {
                 card(ui, |ui| {
                     ui.set_width(ui.available_width());
-                    step_title(ui, 1, "Tamaños", "Cuánto ocupa la ventana al ajustarse");
+                    step_title(ui, 1, tl("Sizes"), tl("How much space the window takes when it snaps"));
                     ui.add_space(6.0);
-                    slider(ui, "Mitad izquierda", &mut s.left_width, 0.2..=0.8);
-                    slider(ui, "Mitad derecha", &mut s.right_width, 0.2..=0.8);
-                    slider(ui, "Cuartos (esquinas)", &mut s.corner_width, 0.2..=0.8);
-                    px_slider(ui, "Margen alrededor", &mut s.gap, 0.0..=40.0);
+                    slider(ui, tl("Left half"), &mut s.left_width, 0.2..=0.8);
+                    slider(ui, tl("Right half"), &mut s.right_width, 0.2..=0.8);
+                    slider(ui, tl("Quarters (corners)"), &mut s.corner_width, 0.2..=0.8);
+                    px_slider(ui, tl("Gap around"), &mut s.gap, 0.0..=40.0);
                 });
                 ui.add_space(10.0);
                 card(ui, |ui| {
                     ui.set_width(ui.available_width());
-                    step_title(ui, 2, "Detección", "Qué tan cerca del borde hay que llegar");
+                    step_title(ui, 2, tl("Detection"), tl("How close to the edge you need to get"));
                     ui.add_space(6.0);
-                    px_slider(ui, "Zona de las esquinas", &mut s.corner_area, 5.0..=150.0);
-                    px_slider(ui, "Ampliar los bordes", &mut s.recognition_extra, 0.0..=40.0);
-                    switch_row(ui, "Esperar un momento antes de ajustar", "Evita ajustes al rozar un borde sin querer", &mut s.delay_enabled);
+                    px_slider(ui, tl("Corner area"), &mut s.corner_area, 5.0..=150.0);
+                    px_slider(ui, tl("Widen the edges"), &mut s.recognition_extra, 0.0..=40.0);
+                    switch_row(ui, tl("Wait a moment before snapping"), tl("Avoids snapping when you brush an edge by accident"), &mut s.delay_enabled);
                     if s.delay_enabled {
                         ui.add(egui::Slider::new(&mut s.delay, 0.05..=1.0).suffix(" s").step_by(0.05));
                     }
@@ -1157,11 +1159,11 @@ pub fn snapping(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                 ui.add_space(10.0);
                 card(ui, |ui| {
                     ui.set_width(ui.available_width());
-                    step_title(ui, 3, "Comportamiento", "");
+                    step_title(ui, 3, tl("Behavior"), "");
                     ui.add_space(6.0);
-                    switch_row(ui, "Recuperar el tamaño al separarla", "Al sacarla del borde vuelve a su tamaño de antes", &mut s.snap_back);
+                    switch_row(ui, tl("Restore the size when pulled away"), tl("Dragging it off the edge brings back its previous size"), &mut s.snap_back);
                     ui.add_space(4.0);
-                    switch_row(ui, "Mostrar vista previa", "Un rectángulo indica dónde quedará la ventana", &mut s.show_preview);
+                    switch_row(ui, tl("Show preview"), tl("A rectangle shows where the window will land"), &mut s.show_preview);
                     if s.show_preview {
                         ui.add_space(4.0);
                         ui.horizontal(|ui| {
@@ -1177,10 +1179,10 @@ pub fn snapping(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                                 }
                             }
                         });
-                        ui.add(egui::Slider::new(&mut s.preview_animation, 0.0..=0.6).suffix(" s").text("Animación"));
+                        ui.add(egui::Slider::new(&mut s.preview_animation, 0.0..=0.6).suffix(" s").text(tl("Animation")));
                     }
                     ui.add_space(8.0);
-                    if ghost_button(ui, "Volver a los valores originales").clicked() {
+                    if ghost_button(ui, tl("Restore the defaults")).clicked() {
                         let excluded = s.excluded_apps.clone();
                         *s = SnapSettings::default();
                         s.excluded_apps = excluded;
@@ -1288,7 +1290,7 @@ fn screen_diagram(app: &mut MacApp, ui: &mut egui::Ui, s: &SnapSettings) {
             p.rect_filled(*r, 3.0, Color32::from_rgba_unmultiplied(a.r(), a.g(), a.b(), 110));
         }
     }
-    ui.label(RichText::new("Pasa el ratón por las zonas de color para ver dónde quedaría la ventana.").size(11.5).color(FAINT));
+    ui.label(RichText::new(tl("Hover over the colored zones to see where the window would go.")).size(11.5).color(FAINT));
 }
 
 // ------------------------------------------------------------------ settings page
@@ -1303,29 +1305,29 @@ pub fn settings(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
         ui.columns(2, |cols| {
             card(&mut cols[0], |ui| {
                 ui.set_width(ui.available_width());
-                section_title(ui, "Permisos");
+                section_title(ui, tl("Permissions"));
                 ui.add_space(4.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Accesibilidad").strong());
+                    ui.label(RichText::new(tl("Accessibility")).strong());
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         if trusted {
-                            pill(ui, "Concedido", GREEN);
+                            pill(ui, tl("Granted"), GREEN);
                         } else {
-                            pill(ui, "Pendiente", AMBER);
+                            pill(ui, tl("Pending"), AMBER);
                         }
                     });
                 });
                 ui.label(
-                    RichText::new("MacControl lo necesita para leer atajos, botones del ratón y para mover las ventanas de otras apps.")
+                    RichText::new(tl("MacControl needs it to read shortcuts and mouse buttons and to move other apps' windows."))
                         .size(12.0)
                         .color(MUTED),
                 );
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
-                    if primary_button(ui, "Pedir permiso").clicked() {
+                    if primary_button(ui, tl("Request permission")).clicked() {
                         crate::mac::ax::request_trust();
                     }
-                    if ghost_button(ui, "Abrir Ajustes del Sistema").clicked() {
+                    if ghost_button(ui, tl("Open System Settings")).clicked() {
                         let _ = std::process::Command::new("/usr/bin/open")
                             .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
                             .spawn();
@@ -1335,13 +1337,13 @@ pub fn settings(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
             cols[0].add_space(10.0);
             card(&mut cols[0], |ui| {
                 ui.set_width(ui.available_width());
-                section_title(ui, "Estado");
+                section_title(ui, tl("Status"));
                 ui.add_space(4.0);
-                status_row(ui, "Teclado y ratón", if tap { ("Escuchando", GREEN) } else { ("Detenido", AMBER) });
-                status_row(ui, "Trackpads", if pads > 0 { (if pads == 1 { "1 detectado" } else { "Varios detectados" }, GREEN) } else { ("Ninguno", AMBER) });
-                status_row(ui, "Ajuste de ventanas", if cfg.snap.enabled { ("Activado", GREEN) } else { ("Desactivado", MUTED) });
+                status_row(ui, tl("Keyboard and mouse"), if tap { (tl("Listening"), GREEN) } else { (tl("Stopped"), AMBER) });
+                status_row(ui, "Trackpads", if pads > 0 { (if pads == 1 { tl("1 detected") } else { tl("Several detected") }, GREEN) } else { (tl("None"), AMBER) });
+                status_row(ui, tl("Window snapping"), if cfg.snap.enabled { (tl("On"), GREEN) } else { (tl("Off"), MUTED) });
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("App en primer plano").color(MUTED));
+                    ui.label(RichText::new(tl("Frontmost app")).color(MUTED));
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         ui.label(if front.is_empty() { "—".to_string() } else { front.clone() });
                     });
@@ -1351,51 +1353,83 @@ pub fn settings(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
                 ui.set_width(ui.available_width());
                 section_title(ui, "General");
                 ui.add_space(4.0);
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new(tl("Language")).strong());
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        i18n::lang_picker(ui, &mut cfg.language);
+                    });
+                });
+                ui.add_space(8.0);
                 let mut active = !cfg.paused;
-                if switch_row(ui, "MacControl activo", "Pausa todas las reglas y el ajuste de ventanas", &mut active) {
+                if switch_row(ui, tl("MacControl active"), tl("Pauses every rule and window snapping"), &mut active) {
                     cfg.paused = !active;
                 }
                 ui.add_space(6.0);
-                switch_row(ui, "Sonido al hacer clic", "Un pequeño «bip» al pulsar dentro de MacControl", &mut cfg.click_sound);
+                switch_row(ui, tl("Click sound"), tl("A little “beep” when you click inside MacControl"), &mut cfg.click_sound);
                 ui.add_space(8.0);
-                ui.label(RichText::new("Al cerrar la ventana, MacControl sigue funcionando desde su icono en la barra de menús.").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("When you close the window, MacControl keeps working from its icon in the menu bar.")).size(12.0).color(MUTED));
                 ui.add_space(6.0);
-                ui.label(RichText::new("Configuración guardada en").size(11.5).color(FAINT));
+                ui.label(RichText::new(tl("Settings saved in")).size(11.5).color(FAINT));
                 ui.label(RichText::new(home_relative(&Config::path())).size(11.5).color(MUTED));
                 ui.add_space(8.0);
                 if app.confirm_reset {
-                    ui.label(RichText::new("¿Seguro? Se borrarán todas tus reglas.").color(AMBER));
+                    ui.label(RichText::new(tl("Are you sure? All your rules will be deleted.")).color(AMBER));
                     ui.horizontal(|ui| {
-                        if danger_button(ui, "Sí, restablecer").clicked() {
+                        if danger_button(ui, tl("Yes, reset")).clicked() {
+                            let language = cfg.language;
                             *cfg = Config::default();
+                            cfg.language = language;
                             app.confirm_reset = false;
                             app.select(None);
                             app.scope = None;
                         }
-                        if ghost_button(ui, "Cancelar").clicked() {
+                        if ghost_button(ui, tl("Cancel")).clicked() {
                             app.confirm_reset = false;
                         }
                     });
-                } else if danger_button(ui, "Restablecer todo").clicked() {
+                } else if danger_button(ui, tl("Reset everything")).clicked() {
                     app.confirm_reset = true;
                 }
             });
             cols[1].add_space(10.0);
             card(&mut cols[1], |ui| {
                 ui.set_width(ui.available_width());
-                section_title(ui, "Acerca de");
+                section_title(ui, tl("About"));
                 ui.add_space(4.0);
                 ui.horizontal(|ui| {
-                    let (r, _) = ui.allocate_exact_size(Vec2::splat(56.0), Sense::hover());
+                    let (r, _) = ui.allocate_exact_size(Vec2::splat(44.0), Sense::hover());
                     app.draw_logo(ui, r);
-                    ui.vertical(|ui| {
-                        ui.label(RichText::new(concat!("MacControl ", env!("CARGO_PKG_VERSION"))).strong().size(15.0));
-                        ui.label(RichText::new("Trackpad, teclado, ratón y ajuste de ventanas para macOS.").size(12.0).color(MUTED));
-                    });
+                    ui.add_space(4.0);
+                    ui.label(RichText::new("MacControl").strong().size(18.0).color(TEXT));
+                    let (a, _) = accent();
+                    pill(ui, &tlf("Version {}", &[&env!("CARGO_PKG_VERSION")]), lerp_color(a, Color32::WHITE, 0.45));
                 });
                 ui.add_space(6.0);
                 ui.label(
-                    RichText::new("Sonido de clic: «audio-volume-change» del tema de sonidos de freedesktop.org, de Lucas McCallister (licencia CC-BY-SA).")
+                    RichText::new(tl("MacControl is a free app for smart management of the trackpad, keyboard shortcuts and window snapping on macOS."))
+                        .size(12.5)
+                        .color(MUTED),
+                );
+                ui.add_space(10.0);
+                ui.spacing_mut().interact_size.y = 16.0;
+                egui::Grid::new("about").num_columns(2).spacing(Vec2::new(14.0, 5.0)).min_col_width(60.0).show(ui, |ui| {
+                    let key = |ui: &mut egui::Ui, text: &str| {
+                        ui.label(RichText::new(text).size(12.5).color(MUTED));
+                    };
+                    key(ui, tl("Author"));
+                    ui.label(RichText::new(AUTHOR).size(12.5));
+                    ui.end_row();
+                    key(ui, tl("Contact"));
+                    let link = ui.visuals().hyperlink_color;
+                    ui.hyperlink_to(RichText::new(EMAIL).size(12.5).color(link), format!("mailto:{EMAIL}"));
+                    ui.end_row();
+                    key(ui, tl("License"));
+                    ui.label(RichText::new("MIT").size(12.5));
+                    ui.end_row();
+                });
+                ui.add_space(8.0);
+                ui.label(
+                    RichText::new(tl("Click sound: “audio-volume-change” by Lucas McCallister, from the freedesktop.org sound theme (CC-BY-SA license)."))
                         .size(11.0)
                         .color(FAINT),
                 );
@@ -1403,6 +1437,9 @@ pub fn settings(app: &mut MacApp, ui: &mut egui::Ui, cfg: &mut Config) {
         });
     });
 }
+
+const AUTHOR: &str = "Joan Galtés i Moreno";
+const EMAIL: &str = "donbuche@gmail.com";
 
 fn status_row(ui: &mut egui::Ui, label: &str, (text, color): (&str, Color32)) {
     ui.horizontal(|ui| {

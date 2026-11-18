@@ -1,5 +1,6 @@
 //! What the person configures: triggers, the actions they run, and snapping settings.
 
+use crate::i18n::{tl, tlf};
 use crate::mechanics as m;
 use serde::{Deserialize, Serialize};
 
@@ -40,12 +41,12 @@ pub fn key_name(code: u16) -> String {
         24 => "=", 25 => "9", 26 => "7", 27 => "-", 28 => "8", 29 => "0", 30 => "]", 31 => "O",
         32 => "U", 33 => "[", 34 => "I", 35 => "P", 36 => "↵", 37 => "L", 38 => "J", 39 => "'",
         40 => "K", 41 => ";", 42 => "\\", 43 => ",", 44 => "/", 45 => "N", 46 => "M", 47 => ".",
-        48 => "⇥", 49 => "Espacio", 50 => "`", 51 => "⌫", 53 => "Esc", 76 => "↵ num",
+        48 => "⇥", 49 => tl("Space"), 50 => "`", 51 => "⌫", 53 => "Esc", 76 => "↵ num",
         96 => "F5", 97 => "F6", 98 => "F7", 99 => "F3", 100 => "F8", 101 => "F9", 103 => "F11",
         105 => "F13", 107 => "F14", 109 => "F10", 111 => "F12", 113 => "F15", 115 => "↖",
         116 => "⇞", 117 => "⌦", 118 => "F4", 119 => "↘", 120 => "F2", 121 => "⇟",
         122 => "F1", 123 => "←", 124 => "→", 125 => "↓", 126 => "↑",
-        _ => return format!("Tecla {code}"),
+        _ => return tlf("Key {}", &[&code]),
     };
     n.to_string()
 }
@@ -60,10 +61,10 @@ pub struct KeyCombo {
 /// turns that press into these keys before any app sees it. Gives (arrow, key name).
 pub fn fn_arrow_key(code: u16) -> Option<(&'static str, &'static str)> {
     match code {
-        115 => Some(("←", "Inicio")),
-        116 => Some(("↑", "RePág")),
-        119 => Some(("→", "Fin")),
-        121 => Some(("↓", "AvPág")),
+        115 => Some(("←", tl("Home"))),
+        116 => Some(("↑", tl("Page Up"))),
+        119 => Some(("→", tl("End"))),
+        121 => Some(("↓", tl("Page Down"))),
         _ => None,
     }
 }
@@ -95,10 +96,10 @@ pub enum Dir {
 impl Dir {
     pub fn label(self) -> &'static str {
         match self {
-            Dir::Up => "arriba",
-            Dir::Down => "abajo",
-            Dir::Left => "izquierda",
-            Dir::Right => "derecha",
+            Dir::Up => tl("up"),
+            Dir::Down => tl("down"),
+            Dir::Left => tl("left"),
+            Dir::Right => tl("right"),
         }
     }
     pub fn arrow(self) -> &'static str {
@@ -123,10 +124,10 @@ pub enum Corner {
 impl Corner {
     pub fn label(self) -> &'static str {
         match self {
-            Corner::TopLeft => "superior izquierda",
-            Corner::TopRight => "superior derecha",
-            Corner::BottomLeft => "inferior izquierda",
-            Corner::BottomRight => "inferior derecha",
+            Corner::TopLeft => tl("top left"),
+            Corner::TopRight => tl("top right"),
+            Corner::BottomLeft => tl("bottom left"),
+            Corner::BottomRight => tl("bottom right"),
         }
     }
     pub const ALL: [Corner; 4] = [Corner::TopLeft, Corner::TopRight, Corner::BottomLeft, Corner::BottomRight];
@@ -154,22 +155,20 @@ pub enum Gesture {
 impl Gesture {
     pub fn label(&self) -> String {
         match *self {
-            Gesture::Tap(n) => format!("Toque con {n} dedos"),
-            Gesture::DoubleTap(n) => format!("Doble toque con {n} dedos"),
-            Gesture::Click(n) => format!("Clic con {n} dedos"),
-            Gesture::Swipe(n, d) => format!("Deslizar {n} dedos hacia {}", d.label()),
-            Gesture::CornerTap(c) => format!("Toque de 1 dedo en esquina {}", c.label()),
-            Gesture::EdgeSwipe(d) => format!(
-                "Deslizar 1 dedo desde el borde {}",
-                match d {
-                    Dir::Left => "izquierdo",
-                    Dir::Right => "derecho",
-                    Dir::Up => "superior",
-                    Dir::Down => "inferior",
-                }
-            ),
-            Gesture::TipTap(Side::Left) => "TipTap izquierda (1 dedo apoyado)".into(),
-            Gesture::TipTap(Side::Right) => "TipTap derecha (1 dedo apoyado)".into(),
+            Gesture::Tap(n) => tlf("Tap with {} fingers", &[&n]),
+            Gesture::DoubleTap(n) => tlf("Double tap with {} fingers", &[&n]),
+            Gesture::Click(n) => tlf("Click with {} fingers", &[&n]),
+            Gesture::Swipe(n, d) => tlf("Swipe {} fingers {}", &[&n, &d.label()]),
+            Gesture::CornerTap(c) => tlf("1-finger tap in the {} corner", &[&c.label()]),
+            Gesture::EdgeSwipe(d) => tl(match d {
+                Dir::Left => "Swipe 1 finger in from the left edge",
+                Dir::Right => "Swipe 1 finger in from the right edge",
+                Dir::Up => "Swipe 1 finger in from the top edge",
+                Dir::Down => "Swipe 1 finger in from the bottom edge",
+            })
+            .into(),
+            Gesture::TipTap(Side::Left) => tl("TipTap left (1 finger resting)").into(),
+            Gesture::TipTap(Side::Right) => tl("TipTap right (1 finger resting)").into(),
         }
     }
     pub fn fingers(&self) -> u8 {
@@ -199,12 +198,12 @@ impl Gesture {
         let tip = vec![Gesture::TipTap(Side::Left), Gesture::TipTap(Side::Right)];
         let edges = Dir::ALL.iter().map(|d| Gesture::EdgeSwipe(*d)).collect();
         vec![
-            ("Toques", taps),
-            ("Clics", clicks),
-            ("Deslizar", swipes),
-            ("Esquinas", corners),
+            (tl("Taps"), taps),
+            (tl("Clicks"), clicks),
+            (tl("Swipes"), swipes),
+            (tl("Corners"), corners),
             ("TipTap", tip),
-            ("Desde el borde", edges),
+            (tl("From the edge"), edges),
         ]
     }
 }
@@ -224,10 +223,10 @@ pub enum MouseTrigger {
 
 pub fn button_name(b: u8) -> String {
     match b {
-        2 => "Botón central".into(),
-        3 => "Botón 4 (atrás)".into(),
-        4 => "Botón 5 (adelante)".into(),
-        n => format!("Botón {}", n + 1),
+        2 => tl("Middle button").into(),
+        3 => tl("Button 4 (back)").into(),
+        4 => tl("Button 5 (forward)").into(),
+        n => tlf("Button {}", &[&(n + 1)]),
     }
 }
 
@@ -242,10 +241,9 @@ impl MouseTrigger {
                     format!("{m} + {}", button_name(button))
                 }
             }
-            MouseTrigger::Scroll { dir, mods } => format!(
-                "{} + rueda hacia {}",
-                if mods == 0 { "?".into() } else { mods_label(mods) },
-                if dir == Wheel::Up { "arriba" } else { "abajo" }
+            MouseTrigger::Scroll { dir, mods } => tlf(
+                if dir == Wheel::Up { "{} + wheel up" } else { "{} + wheel down" },
+                &[&if mods == 0 { "?".into() } else { mods_label(mods) }],
             ),
         }
     }
@@ -292,21 +290,21 @@ pub enum WindowPos {
 impl WindowPos {
     pub fn label(self) -> &'static str {
         match self {
-            WindowPos::Maximize => "Maximizar",
-            WindowPos::LeftHalf => "Mitad izquierda",
-            WindowPos::RightHalf => "Mitad derecha",
-            WindowPos::TopHalf => "Mitad superior",
-            WindowPos::BottomHalf => "Mitad inferior",
-            WindowPos::TopLeft => "Cuarto superior izquierdo",
-            WindowPos::TopRight => "Cuarto superior derecho",
-            WindowPos::BottomLeft => "Cuarto inferior izquierdo",
-            WindowPos::BottomRight => "Cuarto inferior derecho",
-            WindowPos::LeftThird => "Tercio izquierdo",
-            WindowPos::CenterThird => "Tercio central",
-            WindowPos::RightThird => "Tercio derecho",
-            WindowPos::LeftTwoThirds => "Dos tercios izquierda",
-            WindowPos::RightTwoThirds => "Dos tercios derecha",
-            WindowPos::Center => "Centrar",
+            WindowPos::Maximize => tl("Maximize"),
+            WindowPos::LeftHalf => tl("Left half"),
+            WindowPos::RightHalf => tl("Right half"),
+            WindowPos::TopHalf => tl("Top half"),
+            WindowPos::BottomHalf => tl("Bottom half"),
+            WindowPos::TopLeft => tl("Top-left quarter"),
+            WindowPos::TopRight => tl("Top-right quarter"),
+            WindowPos::BottomLeft => tl("Bottom-left quarter"),
+            WindowPos::BottomRight => tl("Bottom-right quarter"),
+            WindowPos::LeftThird => tl("Left third"),
+            WindowPos::CenterThird => tl("Center third"),
+            WindowPos::RightThird => tl("Right third"),
+            WindowPos::LeftTwoThirds => tl("Left two thirds"),
+            WindowPos::RightTwoThirds => tl("Right two thirds"),
+            WindowPos::Center => tl("Center"),
         }
     }
     pub const ALL: [WindowPos; 15] = [
@@ -354,32 +352,32 @@ impl SystemAction {
     pub fn label(self) -> &'static str {
         match self {
             SystemAction::MissionControl => "Mission Control",
-            SystemAction::AppExpose => "Ventanas de la app (App Exposé)",
-            SystemAction::ShowDesktop => "Mostrar escritorio",
+            SystemAction::AppExpose => tl("App windows (App Exposé)"),
+            SystemAction::ShowDesktop => tl("Show desktop"),
             SystemAction::Launchpad => "Launchpad",
-            SystemAction::LockScreen => "Bloquear pantalla",
-            SystemAction::Screenshot => "Captura de una zona",
-            SystemAction::VolumeUp => "Subir volumen",
-            SystemAction::VolumeDown => "Bajar volumen",
-            SystemAction::Mute => "Silenciar / activar sonido",
-            SystemAction::MinimizeWindow => "Minimizar ventana",
-            SystemAction::MinimizeWindowUnderCursor => "Minimizar la ventana bajo el cursor",
-            SystemAction::CloseWindow => "Cerrar ventana",
-            SystemAction::FullScreen => "Pantalla completa",
-            SystemAction::RestoreWindow => "Restaurar tamaño anterior",
-            SystemAction::NextScreen => "Mover a la siguiente pantalla",
-            SystemAction::LeftClick => "Clic izquierdo",
-            SystemAction::RightClick => "Clic derecho",
-            SystemAction::MiddleClick => "Clic central",
+            SystemAction::LockScreen => tl("Lock screen"),
+            SystemAction::Screenshot => tl("Capture an area"),
+            SystemAction::VolumeUp => tl("Volume up"),
+            SystemAction::VolumeDown => tl("Volume down"),
+            SystemAction::Mute => tl("Mute / unmute"),
+            SystemAction::MinimizeWindow => tl("Minimize window"),
+            SystemAction::MinimizeWindowUnderCursor => tl("Minimize the window under the cursor"),
+            SystemAction::CloseWindow => tl("Close window"),
+            SystemAction::FullScreen => tl("Full screen"),
+            SystemAction::RestoreWindow => tl("Restore previous size"),
+            SystemAction::NextScreen => tl("Move to the next screen"),
+            SystemAction::LeftClick => tl("Left click"),
+            SystemAction::RightClick => tl("Right click"),
+            SystemAction::MiddleClick => tl("Middle click"),
         }
     }
     pub fn group(self) -> &'static str {
         use SystemAction::*;
         match self {
-            MinimizeWindow | MinimizeWindowUnderCursor | CloseWindow | FullScreen | RestoreWindow | NextScreen => "Ventanas",
-            LeftClick | RightClick | MiddleClick => "Ratón",
-            VolumeUp | VolumeDown | Mute => "Sonido",
-            _ => "Sistema",
+            MinimizeWindow | MinimizeWindowUnderCursor | CloseWindow | FullScreen | RestoreWindow | NextScreen => tl("Windows"),
+            LeftClick | RightClick | MiddleClick => tl("Mouse"),
+            VolumeUp | VolumeDown | Mute => tl("Sound"),
+            _ => tl("System"),
         }
     }
     pub const ALL: [SystemAction; 18] = [
@@ -419,14 +417,14 @@ pub enum Action {
 impl Action {
     pub fn label(&self) -> String {
         match self {
-            Action::None => "Sin acción".into(),
-            Action::Shortcut(k) => format!("Pulsar {}", k.label()),
+            Action::None => tl("No action").into(),
+            Action::Shortcut(k) => tlf("Press {}", &[&k.label()]),
             Action::Window(w) => w.label().into(),
             Action::System(s) => s.label().into(),
-            Action::OpenApp(a) => format!("Abrir {}", if a.is_empty() { "app…" } else { a }),
-            Action::OpenUrl(u) => format!("Abrir {}", if u.is_empty() { "enlace…" } else { u }),
-            Action::TypeText(t) => format!("Escribir «{}»", short(t, 24)),
-            Action::Shell(c) => format!("Ejecutar «{}»", short(c, 24)),
+            Action::OpenApp(a) => tlf("Open {}", &[&if a.is_empty() { "app…" } else { a }]),
+            Action::OpenUrl(u) => tlf("Open {}", &[&if u.is_empty() { tl("link…") } else { u }]),
+            Action::TypeText(t) => tlf("Type “{}”", &[&short(t, 24)]),
+            Action::Shell(c) => tlf("Run “{}”", &[&short(c, 24)]),
         }
     }
     pub fn kind_index(&self) -> usize {
@@ -528,11 +526,13 @@ pub struct Config {
     pub next_id: u64,
     /// A short "bip" when clicking inside MacControl's window.
     pub click_sound: bool,
+    /// Interface language (the Mac's own when MacControl speaks it, otherwise English).
+    pub language: crate::i18n::Lang,
 }
 
 impl Default for Config {
     fn default() -> Self {
-        let mut c = Config { paused: false, triggers: vec![], snap: SnapSettings::default(), apps: vec![], next_id: 1, click_sound: true };
+        let mut c = Config { paused: false, triggers: vec![], snap: SnapSettings::default(), apps: vec![], next_id: 1, click_sound: true, language: crate::i18n::Lang::system() };
         let k = |key, mods| TriggerKind::Keyboard(KeyCombo { key, mods });
         let presets = [
             (TriggerKind::Trackpad(Gesture::Tap(3)), Action::System(SystemAction::MiddleClick)),
