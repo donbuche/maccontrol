@@ -142,7 +142,7 @@ pub fn start() {
                                         super::place_frame(&d.win, t, z);
                                     }
                                     let label = d.zone.map(|z| z.label()).unwrap_or("");
-                                    eng.note(format!("Ventana ajustada: {label}"), None);
+                                    eng.note(crate::i18n::tlf("Window snapped: {}", &[&label]), None);
                                 }
                             }
                         }

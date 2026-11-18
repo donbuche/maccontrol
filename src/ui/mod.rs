@@ -5,6 +5,7 @@ mod pages;
 pub mod theme;
 
 use crate::engine::{engine, Recording};
+use crate::i18n::{self, tl, Lang};
 use crate::model::{Config, TriggerKind};
 use eframe::egui::{self, Color32, Pos2, Rect, Sense, Stroke, Vec2};
 use icons::Icon;
@@ -31,41 +32,41 @@ fn rgb(hex: u32) -> Color32 {
 impl Page {
     pub fn title(self) -> &'static str {
         match self {
-            Page::Home => "Inicio",
-            Page::Trackpad => "Gestos del trackpad",
-            Page::Keyboard => "Atajos de teclado",
-            Page::Mouse => "Botones del ratón",
-            Page::Snapping => "Ajuste de ventanas",
-            Page::Settings => "Ajustes",
+            Page::Home => tl("Home"),
+            Page::Trackpad => tl("Trackpad gestures"),
+            Page::Keyboard => tl("Keyboard shortcuts"),
+            Page::Mouse => tl("Mouse buttons"),
+            Page::Snapping => tl("Window snapping"),
+            Page::Settings => tl("Settings"),
         }
     }
     pub fn nav(self) -> &'static str {
         match self {
-            Page::Home => "Inicio",
+            Page::Home => tl("Home"),
             Page::Trackpad => "Trackpad",
-            Page::Keyboard => "Teclado",
-            Page::Mouse => "Ratón",
-            Page::Snapping => "Ventanas",
-            Page::Settings => "Ajustes",
+            Page::Keyboard => tl("Keyboard"),
+            Page::Mouse => tl("Mouse"),
+            Page::Snapping => tl("Windows"),
+            Page::Settings => tl("Settings"),
         }
     }
     pub fn subtitle(self) -> &'static str {
         match self {
-            Page::Home => "Todo lo que MacControl puede hacer por ti, de un vistazo.",
-            Page::Trackpad => "Crea reglas: «cuando hago este gesto con los dedos, MacControl hace esto».",
-            Page::Keyboard => "Crea reglas: «cuando pulso estas teclas, MacControl hace esto», en cualquier app.",
-            Page::Mouse => "Da una función a los botones extra o a la rueda de cualquier ratón.",
-            Page::Snapping => "Arrastra una ventana a un borde o esquina de la pantalla y se coloca sola.",
-            Page::Settings => "Permisos, estado, sonido y preferencias generales.",
+            Page::Home => tl("Everything MacControl can do for you, at a glance."),
+            Page::Trackpad => tl("Create rules: “when I make this gesture with my fingers, MacControl does this”."),
+            Page::Keyboard => tl("Create rules: “when I press these keys, MacControl does this”, in any app."),
+            Page::Mouse => tl("Give the extra buttons or the wheel of any mouse a job."),
+            Page::Snapping => tl("Drag a window to an edge or corner of the screen and it snaps into place."),
+            Page::Settings => tl("Language, permissions, status and general preferences."),
         }
     }
     pub fn blurb(self) -> &'static str {
         match self {
             Page::Home => "",
-            Page::Trackpad => "Toques, clics y deslizamientos con 2 a 5 dedos, esquinas y TipTap.",
-            Page::Keyboard => "Combinaciones de teclas globales que hacen lo que quieras.",
-            Page::Mouse => "Botones laterales, botón central y rueda con teclas.",
-            Page::Snapping => "Bordes para mitades, arriba para maximizar y esquinas para cuartos.",
+            Page::Trackpad => tl("Taps, clicks and swipes with 2 to 5 fingers, corners and TipTap."),
+            Page::Keyboard => tl("System-wide key combinations that do whatever you want."),
+            Page::Mouse => tl("Side buttons, middle button and the wheel with keys."),
+            Page::Snapping => tl("Edges for halves, the top to maximize and corners for quarters."),
             Page::Settings => "",
         }
     }
@@ -125,6 +126,10 @@ pub struct MacApp {
     last_frame: Instant,
     tray: Option<tray_icon::TrayIcon>,
     menu_ids: Vec<(tray_icon::menu::MenuId, &'static str)>,
+    /// The menu-bar menu's items, with their English text, to translate them.
+    menu_items: Vec<(tray_icon::menu::MenuItem, &'static str)>,
+    /// The language the menus were last put in.
+    menu_lang: Option<Lang>,
     hidden: bool,
     /// ⌘Q already turned into "close the window".
     quit_redirected: bool,
@@ -169,6 +174,8 @@ impl MacApp {
             last_frame: Instant::now(),
             tray: None,
             menu_ids: vec![],
+            menu_items: vec![],
+            menu_lang: None,
             hidden: false,
             quit_redirected: false,
             seen_inactive: false,
@@ -185,6 +192,7 @@ impl MacApp {
         };
         if screenshot.is_none() {
             *eng.config.write().unwrap() = Config::load();
+            i18n::set(eng.config.read().unwrap().language);
             eng.start();
             crate::sound::init();
             app.make_tray(&cc.egui_ctx);
@@ -192,6 +200,7 @@ impl MacApp {
         } else {
             // A picture for the check: sample rules.
             *eng.config.write().unwrap() = Config::default();
+            i18n::set(eng.config.read().unwrap().language);
         }
         app.selected = eng.config.read().unwrap().triggers.iter().find(|t| app.page.matches(&t.kind)).map(|t| t.id);
         app
@@ -241,11 +250,12 @@ impl MacApp {
     fn make_tray(&mut self, ctx: &egui::Context) {
         use tray_icon::menu::{Menu, MenuEvent, MenuItem, PredefinedMenuItem};
         let menu = Menu::new();
-        let open = MenuItem::new("Abrir MacControl", true, None);
-        let pause = MenuItem::new("Pausar / reanudar", true, None);
-        let quit = MenuItem::new("Salir de MacControl", true, None);
+        let open = MenuItem::new(tl("Open MacControl"), true, None);
+        let pause = MenuItem::new(tl("Pause / resume"), true, None);
+        let quit = MenuItem::new(tl("Quit MacControl"), true, None);
         let _ = menu.append_items(&[&open, &pause, &PredefinedMenuItem::separator(), &quit]);
         self.menu_ids = vec![(open.id().clone(), "open"), (pause.id().clone(), "pause"), (quit.id().clone(), "quit")];
+        self.menu_items = vec![(open, "Open MacControl"), (pause, "Pause / resume"), (quit, "Quit MacControl")];
         let c = ctx.clone();
         MenuEvent::set_event_handler(Some(move |e: MenuEvent| {
             MENU_EVENTS.lock().unwrap().push(e.id);
@@ -325,7 +335,7 @@ impl MacApp {
                 ui.spacing_mut().item_spacing.y = 0.0;
                 ui.add_space(3.0);
                 ui.label(egui::RichText::new("MacControl").size(18.0).strong().color(TEXT));
-                ui.label(egui::RichText::new("Tu Mac, a tu manera").size(11.5).color(MUTED));
+                ui.label(egui::RichText::new(tl("Your Mac, your way")).size(11.5).color(MUTED));
             });
         });
         ui.add_space(26.0);
@@ -380,13 +390,13 @@ impl MacApp {
                 ui.horizontal(|ui| {
                     ui.vertical(|ui| {
                         ui.spacing_mut().item_spacing.y = 2.0;
-                        ui.label(egui::RichText::new(if active { "Activo" } else { "En pausa" }).strong());
+                        ui.label(egui::RichText::new(if active { tl("Active") } else { tl("Paused") }).strong());
                         if !ok {
-                            ui.label(egui::RichText::new("Falta un permiso").size(11.0).color(AMBER));
+                            ui.label(egui::RichText::new(tl("A permission is missing")).size(11.0).color(AMBER));
                         } else if active {
-                            ui.label(egui::RichText::new("Escuchando").size(11.0).color(GREEN));
+                            ui.label(egui::RichText::new(tl("Listening")).size(11.0).color(GREEN));
                         } else {
-                            ui.label(egui::RichText::new("No hace nada").size(11.0).color(MUTED));
+                            ui.label(egui::RichText::new(tl("Doing nothing")).size(11.0).color(MUTED));
                         }
                     });
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -527,6 +537,21 @@ impl eframe::App for MacApp {
 
         let mut cfg = engine().config.read().unwrap().clone();
         let before = serde_json::to_string(&cfg).unwrap_or_default();
+
+        // Interface language: the native menus follow when it changes.
+        i18n::set(cfg.language);
+        if self.menu_lang != Some(cfg.language) && (self.quit_redirected || self.screenshot.is_some()) {
+            for (item, en) in &self.menu_items {
+                item.set_text(tl(*en));
+            }
+            crate::mac::dock::retitle_menu();
+            self.menu_lang = Some(cfg.language);
+        }
+
+        // ⌘, opens Settings, as in every Mac app.
+        if !self.hidden && ctx.input_mut(|i| i.consume_key(egui::Modifiers::COMMAND, egui::Key::Comma)) {
+            self.go(Page::Settings);
+        }
 
         self.snap_overlay(&ctx, &cfg);
 
